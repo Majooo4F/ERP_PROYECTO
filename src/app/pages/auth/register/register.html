@@ -1,36 +1,109 @@
-<div class="flex min-h-screen items-center justify-center bg-slate-100 p-6">
-  <div class="w-full max-w-lg rounded-2xl bg-white p-8 shadow-2xl border border-gray-100">
-    <div class="text-center mb-6">
-      <h1 class="text-3xl font-bold text-black">Crear Cuenta</h1>
-    </div>
+<p-toast></p-toast>
+<div class="flex min-h-screen items-center justify-center bg-slate-100 p-6 py-12">
+  <div class="w-full max-w-2xl rounded-2xl bg-white p-8 shadow-2xl border border-gray-100">
+    <h1 class="text-3xl font-bold text-black text-center mb-8">Crear Cuenta</h1>
 
-    <div class="grid grid-cols-1 gap-5">
-      <div class="flex flex-col gap-2">
+    <form [formGroup]="registerForm" (ngSubmit)="onRegister()" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+      
+      <div class="flex flex-col gap-1">
+        <label class="text-sm font-bold text-gray-700">Usuario</label>
+        <input formControlName="usuario" 
+               type="text" 
+               class="p-3 border rounded-lg outline-none focus:ring-2 focus:ring-blue-200 text-black"
+               [class.border-red-500]="registerForm.get('usuario')?.invalid && registerForm.get('usuario')?.touched"
+               placeholder="Usuario123">
+      </div>
+      <div class="flex flex-col gap-1">
         <label class="text-sm font-bold text-gray-700">Nombre Completo</label>
-        <input type="text" placeholder="Tu nombre"
-               class="w-full rounded-lg border border-gray-300 p-3 shadow-sm outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 transition-all text-black">
+        <input formControlName="nombreCompleto" 
+               type="text" 
+               class="p-3 border rounded-lg outline-none focus:ring-2 focus:ring-blue-200 text-black"
+               [class.border-red-500]="registerForm.get('nombreCompleto')?.invalid && registerForm.get('nombreCompleto')?.touched"
+               placeholder="Juan Pérez">
       </div>
 
-      <div class="flex flex-col gap-2">
+      <div class="flex flex-col gap-1 md:col-span-2">
         <label class="text-sm font-bold text-gray-700">Email</label>
-        <input type="email" placeholder="correo@ejemplo.com"
-               class="w-full rounded-lg border border-gray-300 p-3 shadow-sm outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 transition-all text-black">
+        <input formControlName="email" 
+               type="email" 
+               class="p-3 border rounded-lg outline-none focus:ring-2 focus:ring-blue-200 text-black"
+               [class.border-red-500]="registerForm.get('email')?.invalid && registerForm.get('email')?.touched"
+               placeholder="correo@ejemplo.com">
       </div>
 
-      <div class="flex flex-col gap-2">
+      <div class="flex flex-col gap-1">
+        <label class="text-sm font-bold text-gray-700">Teléfono (Solo números)</label>
+        <input formControlName="telefono" 
+               type="text" 
+               class="p-3 border rounded-lg outline-none focus:ring-2 focus:ring-blue-200 text-black"
+               [class.border-red-500]="registerForm.get('telefono')?.invalid && registerForm.get('telefono')?.touched"
+               placeholder="5512345678">
+      </div>
+
+      <div class="flex flex-col gap-1">
+        <label class="text-sm font-bold text-gray-700">Fecha de Nacimiento</label>
+        <input formControlName="fechaNacimiento" 
+               type="date" 
+               class="p-3 border rounded-lg outline-none focus:ring-2 focus:ring-blue-200 text-black"
+               [class.border-red-500]="registerForm.get('fechaNacimiento')?.invalid && registerForm.get('fechaNacimiento')?.touched">
+        <small *ngIf="registerForm.get('fechaNacimiento')?.errors?.['menorDeEdad'] && registerForm.get('fechaNacimiento')?.touched" 
+               class="text-red-600 font-semibold text-xs">
+          Debes ser mayor de 18 años.
+        </small>
+      </div>
+
+      <div class="flex flex-col gap-1 md:col-span-2">
+        <label class="text-sm font-bold text-gray-700">Dirección</label>
+        <input formControlName="direccion" 
+               type="text" 
+               class="p-3 border rounded-lg outline-none focus:ring-2 focus:ring-blue-200 text-black"
+               [class.border-red-500]="registerForm.get('direccion')?.invalid && registerForm.get('direccion')?.touched"
+               placeholder="Calle Falsa 123">
+      </div>
+
+      <div class="flex flex-col gap-1">
         <label class="text-sm font-bold text-gray-700">Contraseña</label>
-        <input type="password" placeholder="Mínimo 8 caracteres"
-               class="w-full rounded-lg border border-gray-300 p-3 shadow-sm outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 transition-all text-black">
+        <input formControlName="password" 
+               type="password" 
+               class="p-3 border rounded-lg outline-none focus:ring-2 focus:ring-blue-200 text-black"
+               [class.border-red-500]="registerForm.get('password')?.invalid && registerForm.get('password')?.touched"
+               placeholder="Mín. 10 caracteres">
+        <small *ngIf="registerForm.get('password')?.invalid && registerForm.get('password')?.touched" 
+               class="text-red-600 text-xs font-medium">
+          Mínimo 10 caracteres y un símbolo (@$!%*?&).
+        </small>
       </div>
 
-      <button class="w-full rounded-lg bg-emerald-600 py-3.5 font-bold text-white shadow-lg hover:bg-emerald-700 active:scale-[0.98] transition-all">
-        Finalizar Registro
-      </button>
+      <div class="flex flex-col gap-1">
+        <label class="text-sm font-bold text-gray-700">Confirmar Contraseña</label>
+        <input formControlName="confirmPassword" 
+               type="password" 
+               class="p-3 border rounded-lg outline-none focus:ring-2 focus:ring-blue-200 text-black"
+               [class.border-red-500]="(registerForm.get('confirmPassword')?.touched && registerForm.errors?.['notMatching'])">
+        <small *ngIf="registerForm.errors?.['notMatching'] && registerForm.get('confirmPassword')?.touched" 
+               class="text-red-600 text-xs font-medium">
+          Las contraseñas no coinciden.
+        </small>
+      </div>
 
-      <p class="text-center text-sm text-gray-600 pt-2">
-        ¿Ya tienes cuenta? 
-        <a routerLink="/login" class="font-bold text-emerald-600 hover:underline">Inicia sesión</a>
-      </p>
-    </div>
+      <div class="md:col-span-2 mt-4">
+        <button type="submit" 
+                [disabled]="registerForm.invalid" 
+                class="w-full bg-emerald-600 text-white font-bold py-3 rounded-lg hover:bg-emerald-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-md">
+          Finalizar Registro
+        </button>
+
+        <div class="text-center mt-6">
+          <p class="text-sm text-gray-600">
+            ¿Ya tienes cuenta? 
+            <a routerLink="/login" 
+               class="font-bold text-emerald-600 hover:text-emerald-800 hover:underline cursor-pointer transition-colors">
+               Regresar al inicio de sesión
+            </a>
+          </p>
+        </div>
+      </div>
+
+    </form>
   </div>
 </div>
