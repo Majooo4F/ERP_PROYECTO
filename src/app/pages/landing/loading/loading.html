@@ -1,11 +1,37 @@
-<!-- <div class="fixed inset-0 z-[100] flex flex-col items-center justify-center bg-white/70 backdrop-blur-md">
+<div class="fixed inset-0 z-[100] flex flex-col items-center justify-center bg-white/70 backdrop-blur-md">
+
+  <!-- Spinner -->
   <div class="relative flex h-20 w-20 items-center justify-center">
     <div class="absolute h-full w-full animate-spin rounded-full border-4 border-gray-200 border-t-blue-600"></div>
     <div class="h-10 w-10 animate-pulse rounded-full bg-blue-600/20 flex items-center justify-center">
-        <div class="h-4 w-4 rounded-full bg-blue-600"></div>
+      <div class="h-4 w-4 rounded-full bg-blue-600"></div>
     </div>
   </div>
-  
-  <h2 class="mt-6 text-xl font-black text-black tracking-tight animate-pulse">Cargando...</h2>
-  <p class="text-sm font-medium text-gray-500 uppercase tracking-widest">Espera un momento</p>
-</div> -->
+
+  <!-- Texto -->
+  <h2 class="mt-6 text-xl font-black text-black tracking-tight animate-pulse">
+    Cargando...
+  </h2>
+
+  <p class="text-sm font-medium text-gray-500 uppercase tracking-widest mb-6">
+    Selecciona una opción
+  </p>
+
+  <!-- Botones -->
+  <div class="flex gap-4">
+
+    <button 
+      routerLink="/login"
+      class="px-6 py-2 bg-blue-600 text-white font-semibold rounded-lg shadow hover:bg-blue-700 transition">
+      Login
+    </button>
+
+    <button 
+      routerLink="/register"
+      class="px-6 py-2 bg-gray-800 text-white font-semibold rounded-lg shadow hover:bg-gray-900 transition">
+      Register
+    </button>
+
+  </div>
+
+</div>
