@@ -10,13 +10,14 @@ import { ButtonModule } from 'primeng/button';
 @Component({
   selector: 'app-register',
   standalone: true,
-  imports: [ReactiveFormsModule, CommonModule, ToastModule, RouterLink, InputTextModule,
-  ButtonModule],
+  imports: [ReactiveFormsModule, CommonModule, ToastModule, RouterLink, InputTextModule, ButtonModule],
   providers: [MessageService],
   templateUrl: './register.html'
 })
 export class Register implements OnInit {
   registerForm!: FormGroup;
+  // Variable para alternar visibilidad de contraseña
+  showPassword = false;
 
   constructor(private fb: FormBuilder, private messageService: MessageService) {}
 
@@ -26,28 +27,43 @@ export class Register implements OnInit {
       nombreCompleto: ['', Validators.required],
       email: ['', [Validators.required, Validators.email]],
       direccion: ['', Validators.required],
-      telefono: ['', [Validators.required, Validators.pattern('^[0-9]+$')]],
+      
+      // TELÉFONO: Exactamente 10 números
+      telefono: ['', [
+        Validators.required, 
+        Validators.pattern('^[0-9]{10}$')
+      ]],
+      
       fechaNacimiento: ['', [Validators.required, this.validarEdad]],
+      
+      // PASSWORD: Mínimo 8 caracteres, 1 Mayúscula, 1 Número, 1 Símbolo
       password: ['', [
         Validators.required, 
-        Validators.minLength(10),
-        Validators.pattern('^(?=.*[@$!%*?&])[A-Za-z\\d@$!%*?&]{10,}$')
+        Validators.minLength(8),
+        Validators.pattern(/^(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/)
       ]],
+      
       confirmPassword: ['', Validators.required]
     }, { validators: this.compararPasswords });
   }
+
+  // Alternar visibilidad
+  togglePassword() {
+    this.showPassword = !this.showPassword;
+  }
+
   validarEdad(control: AbstractControl) {
     if (!control.value) return null;
     const fechaNac = new Date(control.value);
     const hoy = new Date();
     let edad = hoy.getFullYear() - fechaNac.getFullYear();
     const mes = hoy.getMonth() - fechaNac.getMonth();
-    
     if (mes < 0 || (mes === 0 && hoy.getDate() < fechaNac.getDate())) {
       edad--;
     }
     return edad >= 18 ? null : { menorDeEdad: true };
   }
+
   compararPasswords(group: AbstractControl) {
     const pass = group.get('password')?.value;
     const confirm = group.get('confirmPassword')?.value;
@@ -59,14 +75,14 @@ export class Register implements OnInit {
       this.messageService.add({ 
         severity: 'success', 
         summary: 'Registro Exitoso', 
-        detail: 'Tu cuenta ha sido creada (Localmente)' 
+        detail: 'Tu cuenta ha sido creada' 
       });
-      console.log('Datos enviados:', this.registerForm.value);
+      console.log('Datos:', this.registerForm.value);
     } else {
       this.messageService.add({ 
         severity: 'warn', 
         summary: 'Formulario Inválido', 
-        detail: 'Por favor, revisa los campos marcados en rojo' 
+        detail: 'Revisa los campos en rojo' 
       });
       this.registerForm.markAllAsTouched();
     }
