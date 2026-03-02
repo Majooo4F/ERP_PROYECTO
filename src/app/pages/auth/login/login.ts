@@ -1,7 +1,7 @@
 import { Component } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
-import { RouterLink } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { MessageService } from 'primeng/api';
 import { ToastModule } from 'primeng/toast';
 import { ButtonModule } from 'primeng/button'; 
@@ -9,7 +9,7 @@ import { ButtonModule } from 'primeng/button';
 @Component({
   selector: 'app-login',
   standalone: true,
-  imports: [ReactiveFormsModule, CommonModule, RouterLink, ToastModule, ButtonModule],
+  imports: [ReactiveFormsModule, CommonModule, ToastModule, ButtonModule],
   providers: [MessageService],
   templateUrl: './login.html'
 })
@@ -20,7 +20,11 @@ export class Login {
     password: 'Password123!'
   };
 
-  constructor(private fb: FormBuilder, private messageService: MessageService) {
+  constructor(
+    private fb: FormBuilder, 
+    private messageService: MessageService,
+    private router: Router 
+  ) {
     this.loginForm = this.fb.group({
       email: ['', [Validators.required, Validators.email]],
       password: ['', [Validators.required]]
@@ -32,17 +36,11 @@ export class Login {
       const { email, password } = this.loginForm.value;
 
       if (email === this.VALID_USER.email && password === this.VALID_USER.password) {
-        this.messageService.add({ 
-          severity: 'success', 
-          summary: 'Éxito', 
-          detail: 'Login correcto. ¡Bienvenido!' 
-        });
+        // Redirección inmediata al Home
+        this.router.navigate(['/home']);
+        
       } else {
-        this.messageService.add({ 
-          severity: 'error', 
-          summary: 'Error', 
-          detail: 'Correo o contraseña incorrectos' 
-        });
+        alert('Correo o contraseña incorrectos'); // Simplificado para el ejemplo
       }
     }
   }

@@ -1,0 +1,26 @@
+
+<p-toolbar class="shadow-2 custom-toolbar">
+  <div class="p-toolbar-group-start">
+    <p-button
+      icon="pi pi-bars"
+      (click)="visible = true"
+      [text]="true">
+    </p-button>
+
+    <span class="title">Mi Sistema</span>
+  </div>
+</p-toolbar>
+
+<p-drawer
+  [(visible)]="visible"
+  header="Menú"
+  position="left"
+  [modal]="true"
+  [dismissible]="true"
+  [showCloseIcon]="true">
+  <app-sidebar></app-sidebar>
+
+</p-drawer>
+<div class="content">
+  <router-outlet></router-outlet>
+</div>

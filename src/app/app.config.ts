@@ -5,6 +5,7 @@ import { provideAnimationsAsync } from '@angular/platform-browser/animations/asy
 import { providePrimeNG } from 'primeng/config';
 import Lara from '@primeuix/themes/lara';
 
+
 export const appConfig: ApplicationConfig = {
   providers: [
     provideBrowserGlobalErrorListeners(),

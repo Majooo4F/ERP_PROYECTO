@@ -16,7 +16,7 @@ import { ButtonModule } from 'primeng/button';
 })
 export class Register implements OnInit {
   registerForm!: FormGroup;
-  // Variable para alternar visibilidad de contraseña
+
   showPassword = false;
 
   constructor(private fb: FormBuilder, private messageService: MessageService) {}
@@ -28,7 +28,7 @@ export class Register implements OnInit {
       email: ['', [Validators.required, Validators.email]],
       direccion: ['', Validators.required],
       
-      // TELÉFONO: Exactamente 10 números
+   
       telefono: ['', [
         Validators.required, 
         Validators.pattern('^[0-9]{10}$')
@@ -36,7 +36,6 @@ export class Register implements OnInit {
       
       fechaNacimiento: ['', [Validators.required, this.validarEdad]],
       
-      // PASSWORD: Mínimo 8 caracteres, 1 Mayúscula, 1 Número, 1 Símbolo
       password: ['', [
         Validators.required, 
         Validators.minLength(8),
@@ -47,7 +46,6 @@ export class Register implements OnInit {
     }, { validators: this.compararPasswords });
   }
 
-  // Alternar visibilidad
   togglePassword() {
     this.showPassword = !this.showPassword;
   }

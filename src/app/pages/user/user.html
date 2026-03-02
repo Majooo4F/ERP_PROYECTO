@@ -1,0 +1,77 @@
+<p-toast></p-toast>
+<h1 style="color:red">FUNCIONA USER</h1>
+<div class="flex min-h-screen items-center justify-center bg-slate-100 p-6 py-12">
+  <div class="w-full max-w-2xl rounded-2xl bg-white p-8 shadow-2xl border border-gray-100">
+    <h1 class="text-3xl font-bold text-black text-center mb-8">Editar Usuario</h1>
+
+    <form [formGroup]="userForm" (ngSubmit)="onSave()" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+
+      <!-- Usuario -->
+      <div class="flex flex-col gap-1">
+        <label class="text-sm font-bold text-gray-700">Usuario</label>
+        <input formControlName="usuario" type="text"
+               class="p-3 border rounded-lg outline-none focus:ring-2 focus:ring-blue-200 text-black">
+      </div>
+
+      <!-- Nombre -->
+      <div class="flex flex-col gap-1">
+        <label class="text-sm font-bold text-gray-700">Nombre Completo</label>
+        <input formControlName="nombreCompleto" type="text"
+               class="p-3 border rounded-lg outline-none focus:ring-2 focus:ring-blue-200 text-black">
+      </div>
+
+      <!-- Email -->
+      <div class="flex flex-col gap-1 md:col-span-2">
+        <label class="text-sm font-bold text-gray-700">Email</label>
+        <input formControlName="email" type="email"
+               class="p-3 border rounded-lg outline-none focus:ring-2 focus:ring-blue-200 text-black">
+      </div>
+
+      <!-- Teléfono -->
+      <div class="flex flex-col gap-1">
+        <label class="text-sm font-bold text-gray-700">Teléfono</label>
+        <input formControlName="telefono" type="text" maxlength="10"
+               class="p-3 border rounded-lg outline-none focus:ring-2 focus:ring-blue-200 text-black">
+      </div>
+
+      <!-- Fecha -->
+      <div class="flex flex-col gap-1">
+        <label class="text-sm font-bold text-gray-700">Fecha de Nacimiento</label>
+        <input formControlName="fechaNacimiento" type="date"
+               class="p-3 border rounded-lg outline-none focus:ring-2 focus:ring-blue-200 text-black">
+      </div>
+
+      <!-- Dirección -->
+      <div class="flex flex-col gap-1 md:col-span-2">
+        <label class="text-sm font-bold text-gray-700">Dirección</label>
+        <input formControlName="direccion" type="text"
+               class="p-3 border rounded-lg outline-none focus:ring-2 focus:ring-blue-200 text-black">
+      </div>
+
+      <!-- Password -->
+      <div class="flex flex-col gap-1">
+        <label class="text-sm font-bold text-gray-700">Contraseña</label>
+        <input [type]="showPassword ? 'text' : 'password'"
+               formControlName="password"
+               class="p-3 border rounded-lg outline-none focus:ring-2 focus:ring-blue-200 text-black">
+      </div>
+
+      <!-- Confirm Password -->
+      <div class="flex flex-col gap-1">
+        <label class="text-sm font-bold text-gray-700">Confirmar Contraseña</label>
+        <input [type]="showPassword ? 'text' : 'password'"
+               formControlName="confirmPassword"
+               class="p-3 border rounded-lg outline-none focus:ring-2 focus:ring-blue-200 text-black">
+      </div>
+
+      <div class="md:col-span-2 mt-4">
+        <button type="submit"
+                [disabled]="userForm.invalid"
+                class="w-full bg-emerald-600 text-white font-bold py-3 rounded-lg hover:bg-emerald-700 transition-all disabled:opacity-50 shadow-md">
+          Guardar Cambios
+        </button>
+      </div>
+
+    </form>
+  </div>
+</div>
