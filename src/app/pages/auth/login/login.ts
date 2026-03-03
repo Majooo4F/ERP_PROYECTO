@@ -6,10 +6,11 @@ import { MessageService } from 'primeng/api';
 import { ToastModule } from 'primeng/toast';
 import { ButtonModule } from 'primeng/button'; 
 
+
 @Component({
   selector: 'app-login',
   standalone: true,
-  imports: [ReactiveFormsModule, CommonModule, ToastModule, ButtonModule],
+  imports: [ReactiveFormsModule, CommonModule, ToastModule, ButtonModule, RouterLink],
   providers: [MessageService],
   templateUrl: './login.html'
 })

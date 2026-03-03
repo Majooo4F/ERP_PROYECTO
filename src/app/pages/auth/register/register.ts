@@ -6,6 +6,7 @@ import { ToastModule } from 'primeng/toast';
 import { RouterLink } from '@angular/router';
 import { InputTextModule } from 'primeng/inputtext';
 import { ButtonModule } from 'primeng/button';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-register',
@@ -19,7 +20,11 @@ export class Register implements OnInit {
 
   showPassword = false;
 
-  constructor(private fb: FormBuilder, private messageService: MessageService) {}
+  constructor(
+  private fb: FormBuilder,
+  private messageService: MessageService,
+  private router: Router
+) {}
 
   ngOnInit() {
     this.registerForm = this.fb.group({
@@ -69,20 +74,27 @@ export class Register implements OnInit {
   }
 
   onRegister() {
-    if (this.registerForm.valid) {
-      this.messageService.add({ 
-        severity: 'success', 
-        summary: 'Registro Exitoso', 
-        detail: 'Tu cuenta ha sido creada' 
-      });
-      console.log('Datos:', this.registerForm.value);
-    } else {
-      this.messageService.add({ 
-        severity: 'warn', 
-        summary: 'Formulario Inválido', 
-        detail: 'Revisa los campos en rojo' 
-      });
-      this.registerForm.markAllAsTouched();
-    }
+  if (this.registerForm.valid) {
+
+    this.messageService.add({ 
+      severity: 'success', 
+      summary: 'Registro Exitoso', 
+      detail: 'Redirigiendo al login...' 
+    });
+
+    console.log('Datos:', this.registerForm.value);
+
+    setTimeout(() => {
+      this.router.navigate(['/login']);
+    }, 1500);
+
+  } else {
+    this.messageService.add({ 
+      severity: 'warn', 
+      summary: 'Formulario Inválido', 
+      detail: 'Revisa los campos en rojo' 
+    });
+    this.registerForm.markAllAsTouched();
   }
+}
 }

@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { MenuModule } from 'primeng/menu';
 import { MenuItem } from 'primeng/api';
+import { group } from 'console';
 
 @Component({
   selector: 'app-sidebar',
@@ -25,13 +26,18 @@ export class Sidebar implements OnInit {
           {
             label: 'Dashboard',
             icon: 'pi pi-home',
-            command: () => this.router.navigate(['/home'])
+            command: () => this.router.navigate(['home'])
           },
           {
             label: 'Usuarios',
             icon: 'pi pi-users',
-            command: () => this.router.navigate(['/user'])
+            command: () => this.router.navigate(['user'])
           },
+        {
+          label:  'Grupos',
+          icon: 'pi pi-id-card',
+          command:() => this.router.navigate(['groups'])
+        },
           {
             label: 'Reportes',
             icon: 'pi pi-chart-bar',
@@ -52,6 +58,7 @@ export class Sidebar implements OnInit {
             icon: 'pi pi-sign-out',
             command: () => this.router.navigate(['/login'])
           }
+
         ]
       }
     ];

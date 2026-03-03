@@ -15,22 +15,23 @@ import { MessageService } from 'primeng/api';
 export class User {
 
   showPassword = false;
-
-  userForm = this.fb.group({
-    usuario: ['', Validators.required],
-    nombreCompleto: ['', Validators.required],
-    email: ['', [Validators.required, Validators.email]],
-    telefono: ['', [Validators.required, Validators.pattern(/^[0-9]{10}$/)]],
-    fechaNacimiento: ['', Validators.required],
-    direccion: ['', Validators.required],
-    password: ['', [Validators.required, Validators.minLength(8)]],
-    confirmPassword: ['', Validators.required]
-  }, { validators: this.passwordMatchValidator });
+  userForm!: any; 
 
   constructor(
     private fb: FormBuilder,
     private messageService: MessageService
-  ) {}
+  ) {
+    this.userForm = this.fb.group({
+      usuario: ['', Validators.required],
+      nombreCompleto: ['', Validators.required],
+      email: ['', [Validators.required, Validators.email]],
+      telefono: ['', [Validators.required, Validators.pattern(/^[0-9]{10}$/)]],
+      fechaNacimiento: ['', Validators.required],
+      direccion: ['', Validators.required],
+      password: ['', [Validators.required, Validators.minLength(8)]],
+      confirmPassword: ['', Validators.required]
+    }, { validators: this.passwordMatchValidator });
+  }
 
   togglePassword() {
     this.showPassword = !this.showPassword;
@@ -46,7 +47,7 @@ export class User {
     if (this.userForm.invalid) return;
 
     this.messageService.add({
-      severity: 'success',
+      severity: 'info',
       summary: 'Actualizado',
       detail: 'Usuario actualizado correctamente'
     });

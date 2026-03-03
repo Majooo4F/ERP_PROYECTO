@@ -1,1 +1,143 @@
-<p>groups works!</p>
+<div class="flex flex-column align-items-center justify-content-center py-5 gap-4">
+
+  <!-- CARD TOTAL -->
+  <div class="w-full" style="max-width: 35rem;">
+    <p-card styleClass="shadow-2">
+      <div class="text-center">
+        <h2 class="text-4xl font-bold m-0 text-primary">
+          {{ totalUsuarios }}
+        </h2>
+        <p class="text-color-secondary m-0">Total de Registros</p>
+      </div>
+    </p-card>
+  </div>
+
+  <!-- CARD CRUD -->
+  <div class="w-full" style="max-width: 60rem;">
+    <p-card>
+
+      <!-- HEADER -->
+      <div class="flex justify-content-between align-items-center mb-3">
+        <h3 class="m-0">Gestión</h3>
+        <p-button 
+          label="Nuevo"
+          icon="pi pi-plus"
+          severity="success"
+          (click)="openNew()">
+        </p-button>
+      </div>
+
+      <!-- TABLA -->
+      <p-table 
+        [value]="registros"
+        responsiveLayout="scroll"
+        styleClass="p-datatable-striped">
+
+        <ng-template pTemplate="header">
+          <tr>
+            <th>Nivel</th>
+            <th>Autor</th>
+            <th>Nombre</th>
+            <th>Integrantes</th>
+            <th>Tickets</th>
+            <th class="text-center">Acciones</th>
+          </tr>
+        </ng-template>
+
+        <ng-template pTemplate="body" let-item let-i="rowIndex">
+          <tr>
+            <td>{{ item.nivel }}</td>
+            <td>{{ item.autor }}</td>
+            <td>{{ item.nombre }}</td>
+            <td>{{ item.integrantes }}</td>
+            <td>{{ item.tickets }}</td>
+            <td class="flex justify-content-center gap-2">
+              <p-button 
+                icon="pi pi-pencil"
+                severity="contrast"
+                rounded
+                text
+                (click)="edit(item, i)">
+              </p-button>
+
+              <p-button 
+                icon="pi pi-trash"
+                severity="danger"
+                rounded
+                text
+                (click)="confirmDelete(i)">
+              </p-button>
+            </td>
+          </tr>
+        </ng-template>
+
+      </p-table>
+
+    </p-card>
+  </div>
+</div>
+
+<!-- DIALOG -->
+<p-dialog
+  [header]="isEdit ? 'Editar Registro' : 'Nuevo Registro'"
+  [(visible)]="visible"
+  [modal]="true"
+  [closable]="false"
+  [style]="{ width: '30rem' }">
+
+  <div class="flex flex-column gap-3">
+
+    <div class="flex flex-column gap-1">
+      <label>Nivel</label>
+      <input pInputText [(ngModel)]="form.nivel" class="w-full" />
+    </div>
+
+    <div class="flex flex-column gap-1">
+      <label>Autor</label>
+      <input pInputText [(ngModel)]="form.autor" class="w-full" />
+    </div>
+
+    <div class="flex flex-column gap-1">
+      <label>Nombre</label>
+      <input pInputText [(ngModel)]="form.nombre" class="w-full" />
+    </div>
+
+    <div class="flex flex-column gap-1">
+      <label>Integrantes</label>
+      <input pInputText [(ngModel)]="form.integrantes" class="w-full" />
+    </div>
+
+    <div class="flex flex-column gap-1">
+      <label>Tickets</label>
+      <input pInputText [(ngModel)]="form.tickets" class="w-full" />
+    </div>
+
+    <div class="flex flex-column gap-1">
+      <label>Descripción</label>
+      <textarea
+        pInputTextarea
+        rows="3"
+        [(ngModel)]="form.descripcion"
+        class="w-full">
+      </textarea>
+    </div>
+
+    <div class="flex justify-content-end gap-2 mt-3">
+      <p-button
+        label="Cancelar"
+        severity="secondary"
+        text
+        (click)="visible=false">
+      </p-button>
+
+      <p-button
+        label="Guardar"
+        severity="primary"
+        (click)="save()">
+      </p-button>
+    </div>
+
+  </div>
+</p-dialog>
+
+<p-confirmDialog></p-confirmDialog>
