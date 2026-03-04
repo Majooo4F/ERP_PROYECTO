@@ -7,9 +7,18 @@ import { ButtonModule } from 'primeng/button';
 import { TableModule } from 'primeng/table';
 import { DialogModule } from 'primeng/dialog';
 import { InputTextModule } from 'primeng/inputtext';
-import { TextareaModule } from 'primeng/textarea'; // ✅ CAMBIO AQUÍ
+import { TextareaModule } from 'primeng/textarea';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import { ConfirmationService } from 'primeng/api';
+
+interface Grupo {
+  nivel: string;
+  autor: string;
+  nombre: string;
+  integrantes: number;
+  tickets: number;
+  descripcion: string;
+}
 
 @Component({
   selector: 'app-groups',
@@ -22,7 +31,7 @@ import { ConfirmationService } from 'primeng/api';
     TableModule,
     DialogModule,
     InputTextModule,
-    TextareaModule, // ✅ CAMBIO AQUÍ
+    TextareaModule,
     ConfirmDialogModule
   ],
   providers: [ConfirmationService],
@@ -30,46 +39,55 @@ import { ConfirmationService } from 'primeng/api';
 })
 export class Groups {
 
-  registros: any[] = [];
+  registros: Grupo[] = [
+    {
+      nivel: 'Básico',
+      autor: 'Juan Pérez',
+      nombre: 'Grupo Angular',
+      integrantes: 10,
+      tickets: 25,
+      descripcion: 'Grupo de introducción a Angular'
+    }
+  ];
 
   visible: boolean = false;
   isEdit: boolean = false;
   editIndex: number | null = null;
 
-  form: any = this.resetForm();
+  form: Grupo = this.resetForm();
 
   constructor(private confirmationService: ConfirmationService) {}
 
-  get totalUsuarios() {
+  get totalUsuarios(): number {
     return this.registros.length;
   }
 
-  resetForm() {
+  resetForm(): Grupo {
     return {
       nivel: '',
       autor: '',
       nombre: '',
-      integrantes: '',
-      tickets: '',
+      integrantes: 0,
+      tickets: 0,
       descripcion: ''
     };
   }
 
-  openNew() {
+  openNew(): void {
     this.isEdit = false;
-    this.editIndex = null; // buena práctica
+    this.editIndex = null;
     this.form = this.resetForm();
     this.visible = true;
   }
 
-  edit(item: any, index: number) {
+  edit(item: Grupo, index: number): void {
     this.isEdit = true;
     this.editIndex = index;
     this.form = { ...item };
     this.visible = true;
   }
 
-  save() {
+  save(): void {
     if (this.isEdit && this.editIndex !== null) {
       this.registros[this.editIndex] = { ...this.form };
     } else {
@@ -80,10 +98,10 @@ export class Groups {
     this.form = this.resetForm();
   }
 
-  confirmDelete(index: number) {
+  confirmDelete(index: number): void {
     this.confirmationService.confirm({
-      message: '¿Seguro que deseas eliminar?',
-      header: 'Confirmar',
+      message: '¿Seguro que deseas eliminar este grupo?',
+      header: 'Confirmar eliminación',
       icon: 'pi pi-exclamation-triangle',
       accept: () => {
         this.registros.splice(index, 1);

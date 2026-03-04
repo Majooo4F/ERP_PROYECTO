@@ -30,7 +30,10 @@ export class Register implements OnInit {
     this.registerForm = this.fb.group({
       usuario: ['', Validators.required],
       nombreCompleto: ['', Validators.required],
-      email: ['', [Validators.required, Validators.email]],
+      email: ['', [
+  Validators.required,
+  Validators.pattern(/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-z]{2,}$/)
+]],
       direccion: ['', Validators.required],
       
    
@@ -74,27 +77,48 @@ export class Register implements OnInit {
   }
 
   onRegister() {
-  if (this.registerForm.valid) {
 
-    this.messageService.add({ 
-      severity: 'success', 
-      summary: 'Registro Exitoso', 
-      detail: 'Redirigiendo al login...' 
+  // 🔴 Validar si es menor de edad
+  if (this.registerForm.get('fechaNacimiento')?.errors?.['menorDeEdad']) {
+    
+    this.messageService.add({
+      severity: 'error',
+      summary: 'Edad inválida',
+      detail: 'Debes ser mayor de 18 años para registrarte.'
     });
 
-    console.log('Datos:', this.registerForm.value);
+    this.registerForm.get('fechaNacimiento')?.markAsTouched();
+    return;
+  }
+  if (this.registerForm.get('email')?.invalid) {
+  this.messageService.add({
+    severity: 'error',
+    summary: 'Correo inválido',
+    detail: 'El correo debe contener @ y un dominio válido.'
+  });
+  return;
+}
+
+  if (this.registerForm.valid) {
+
+    this.messageService.add({
+      severity: 'success',
+      summary: 'Registro Exitoso',
+      detail: 'Redirigiendo al login...'
+    });
 
     setTimeout(() => {
       this.router.navigate(['/login']);
     }, 1500);
 
   } else {
-    this.messageService.add({ 
-      severity: 'warn', 
-      summary: 'Formulario Inválido', 
-      detail: 'Revisa los campos en rojo' 
+
+    this.messageService.add({
+      severity: 'warn',
+      summary: 'Formulario Inválido',
+      detail: 'Revisa los campos en rojo.'
     });
+
     this.registerForm.markAllAsTouched();
   }
-}
-}
+  }}

@@ -1,106 +1,133 @@
 <p-toast></p-toast>
+
 <div class="flex min-h-screen items-center justify-center bg-slate-100 p-6 py-12">
   <div class="w-full max-w-2xl rounded-2xl bg-white p-8 shadow-2xl border border-gray-100">
     <h1 class="text-3xl font-bold text-black text-center mb-8">Crear Cuenta</h1>
 
-    <form [formGroup]="registerForm" (ngSubmit)="onRegister()" class="grid grid-cols-1 md:grid-cols-2 gap-4">
-      
+    <form [formGroup]="registerForm" (ngSubmit)="onRegister()" 
+          class="grid grid-cols-1 md:grid-cols-2 gap-4">
+
+      <!-- Usuario -->
       <div class="flex flex-col gap-1">
         <label class="text-sm font-bold text-gray-700">Usuario</label>
-        <input formControlName="usuario" type="text" 
-               class="p-3 border rounded-lg outline-none focus:ring-2 focus:ring-blue-200 text-black"
-               [class.border-red-500]="registerForm.get('usuario')?.invalid && registerForm.get('usuario')?.touched"
-               placeholder="Usuario123">
+        <input formControlName="usuario" type="text"
+          class="p-3 border rounded-lg outline-none focus:ring-2 focus:ring-blue-200 text-black"
+          [class.border-red-500]="registerForm.get('usuario')?.invalid && registerForm.get('usuario')?.touched"
+          placeholder="Usuario123">
       </div>
 
+      <!-- Nombre -->
       <div class="flex flex-col gap-1">
         <label class="text-sm font-bold text-gray-700">Nombre Completo</label>
-        <input formControlName="nombreCompleto" type="text" 
-               class="p-3 border rounded-lg outline-none focus:ring-2 focus:ring-blue-200 text-black"
-               [class.border-red-500]="registerForm.get('nombreCompleto')?.invalid && registerForm.get('nombreCompleto')?.touched"
-               placeholder="Juan Pérez">
+        <input formControlName="nombreCompleto" type="text"
+          class="p-3 border rounded-lg outline-none focus:ring-2 focus:ring-blue-200 text-black"
+          [class.border-red-500]="registerForm.get('nombreCompleto')?.invalid && registerForm.get('nombreCompleto')?.touched"
+          placeholder="Juan Pérez">
       </div>
 
+      <!-- Email -->
       <div class="flex flex-col gap-1 md:col-span-2">
-        <label class="text-sm font-bold text-gray-700">Email</label>
-        <input formControlName="email" type="email" 
-               class="p-3 border rounded-lg outline-none focus:ring-2 focus:ring-blue-200 text-black"
-               [class.border-red-500]="registerForm.get('email')?.invalid && registerForm.get('email')?.touched"
-               placeholder="correo@ejemplo.com">
-      </div>
+  <label class="text-sm font-bold text-gray-700">Email</label>
+  <input formControlName="email" type="email"
+    class="p-3 border rounded-lg outline-none focus:ring-2 focus:ring-blue-200 text-black"
+    [class.border-red-500]="registerForm.get('email')?.invalid && registerForm.get('email')?.touched"
+    placeholder="correo@ejemplo.com">
 
+  <small *ngIf="registerForm.get('email')?.invalid 
+                && registerForm.get('email')?.touched"
+         class="text-red-600 text-xs">
+    Ingresa un correo válido (ejemplo: usuario@gmail.com)
+  </small>
+</div>
+
+      <!-- Teléfono -->
       <div class="flex flex-col gap-1">
         <label class="text-sm font-bold text-gray-700">Teléfono (10 dígitos)</label>
-        <input formControlName="telefono" 
-               type="text" 
-               maxlength="10"
-               inputmode="numeric"
-               onkeypress="return /[0-9]/.test(event.key)"
-               class="p-3 border rounded-lg outline-none focus:ring-2 focus:ring-blue-200 text-black"
-               [class.border-red-500]="registerForm.get('telefono')?.invalid && registerForm.get('telefono')?.touched"
-               placeholder="5512345678">
+        <input formControlName="telefono"
+          type="text"
+          maxlength="10"
+          inputmode="numeric"
+          onkeypress="return /[0-9]/.test(event.key)"
+          class="p-3 border rounded-lg outline-none focus:ring-2 focus:ring-blue-200 text-black"
+          [class.border-red-500]="registerForm.get('telefono')?.invalid && registerForm.get('telefono')?.touched"
+          placeholder="5512345678">
       </div>
 
-      <div class="flex flex-col gap-1">
-        <label class="text-sm font-bold text-gray-700">Fecha de Nacimiento</label>
-        <input formControlName="fechaNacimiento" type="date" 
-               class="p-3 border rounded-lg outline-none focus:ring-2 focus:ring-blue-200 text-black"
-               [class.border-red-500]="registerForm.get('fechaNacimiento')?.invalid && registerForm.get('fechaNacimiento')?.touched">
-      </div>
+      <!-- Fecha -->
+     <div class="flex flex-col gap-1">
+  <label class="text-sm font-bold text-gray-700">Fecha de Nacimiento</label>
+  <input formControlName="fechaNacimiento" type="date"
+    class="p-3 border rounded-lg outline-none focus:ring-2 focus:ring-blue-200 text-black"
+    [class.border-red-500]="registerForm.get('fechaNacimiento')?.invalid && registerForm.get('fechaNacimiento')?.touched">
 
+  <small *ngIf="registerForm.get('fechaNacimiento')?.errors?.['menorDeEdad'] 
+                && registerForm.get('fechaNacimiento')?.touched"
+         class="text-red-600 text-xs">
+    Debes ser mayor de 18 años.
+  </small>
+</div>
+
+      <!-- Dirección -->
       <div class="flex flex-col gap-1 md:col-span-2">
         <label class="text-sm font-bold text-gray-700">Dirección</label>
-        <input formControlName="direccion" type="text" 
-               class="p-3 border rounded-lg outline-none focus:ring-2 focus:ring-blue-200 text-black"
-               [class.border-red-500]="registerForm.get('direccion')?.invalid && registerForm.get('direccion')?.touched"
-               placeholder="Calle Falsa 123">
+        <input formControlName="direccion" type="text"
+          class="p-3 border rounded-lg outline-none focus:ring-2 focus:ring-blue-200 text-black"
+          [class.border-red-500]="registerForm.get('direccion')?.invalid && registerForm.get('direccion')?.touched"
+          placeholder="Calle Falsa 123">
       </div>
 
+      <!-- Contraseña -->
       <div class="flex flex-col gap-1">
         <label class="text-sm font-bold text-gray-700">Contraseña</label>
         <div class="relative">
-          <input [type]="showPassword ? 'text' : 'password'" 
-                 formControlName="password" 
-                 class="w-full p-3 border rounded-lg outline-none focus:ring-2 focus:ring-blue-200 text-black pr-10"
-                 [class.border-red-500]="registerForm.get('password')?.invalid && registerForm.get('password')?.touched"
-                 placeholder="Mín. 8 caracteres">
-          <button type="button" 
-                  (click)="togglePassword()"
-                  class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-emerald-600 transition-colors focus:outline-none">
-            <i [class]="showPassword ? 'pi pi-eye-slash' : 'pi pi-eye'" class="text-lg"></i>
+          <input [type]="showPassword ? 'text' : 'password'"
+            formControlName="password"
+            class="w-full p-3 border rounded-lg outline-none focus:ring-2 focus:ring-blue-200 text-black pr-10"
+            [class.border-red-500]="registerForm.get('password')?.invalid && registerForm.get('password')?.touched"
+            placeholder="Mín. 8 caracteres">
+
+          <button type="button"
+            (click)="togglePassword()"
+            class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-emerald-600 focus:outline-none">
+
+            <!-- 👁 Abierto cuando se ve -->
+            <i [class]="showPassword ? 'pi pi-eye' : 'pi pi-eye-slash'" 
+               class="text-lg"></i>
+
           </button>
         </div>
-        <small *ngIf="registerForm.get('password')?.invalid && registerForm.get('password')?.touched" class="text-red-600 text-xs">
+
+        <small *ngIf="registerForm.get('password')?.invalid && registerForm.get('password')?.touched"
+          class="text-red-600 text-xs">
           Requiere: 1 Mayúscula, 1 Número y 1 Símbolo.
         </small>
       </div>
 
+      <!-- Confirmar Contraseña -->
       <div class="flex flex-col gap-1">
         <label class="text-sm font-bold text-gray-700">Confirmar Contraseña</label>
-        <div class="relative">
-          <input [type]="showPassword ? 'text' : 'password'" 
-                 formControlName="confirmPassword" 
-                 class="w-full p-3 border rounded-lg outline-none focus:ring-2 focus:ring-blue-200 text-black pr-10"
-                 [class.border-red-500]="(registerForm.get('confirmPassword')?.touched && registerForm.errors?.['notMatching'])"
-                 placeholder="Repite tu contraseña">
-          <button type="button" 
-                  (click)="togglePassword()"
-                  class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-emerald-600 transition-colors focus:outline-none">
-            <i [class]="showPassword ? 'pi pi-eye' : 'pi pi-eye-slash'" class="text-lg"></i>
-          </button>
-        </div>
-        <small *ngIf="registerForm.errors?.['notMatching'] && registerForm.get('confirmPassword')?.touched" class="text-red-600 text-xs">
+        <input [type]="showPassword ? 'text' : 'password'"
+          formControlName="confirmPassword"
+          class="w-full p-3 border rounded-lg outline-none focus:ring-2 focus:ring-blue-200 text-black"
+          [class.border-red-500]="registerForm.errors?.['notMatching'] && registerForm.get('confirmPassword')?.touched"
+          placeholder="Repite tu contraseña">
+
+        <small *ngIf="registerForm.errors?.['notMatching'] && registerForm.get('confirmPassword')?.touched"
+          class="text-red-600 text-xs">
           Las contraseñas no coinciden.
         </small>
       </div>
 
+      <!-- Botón -->
       <div class="md:col-span-2 mt-4">
-        <button type="submit" 
-                [disabled]="registerForm.invalid" 
-                class="w-full bg-emerald-600 text-white font-bold py-3 rounded-lg hover:bg-emerald-700 transition-all disabled:opacity-50 shadow-md">
-          Finalizar Registro
-        </button>
+        <p-button 
+          type="submit"
+          label="Finalizar Registro"
+          [disabled]="registerForm.invalid"
+          styleClass="w-full bg-emerald-600 border-none font-bold py-3 shadow-md">
+        </p-button>
       </div>
+
     </form>
   </div>
 </div>
