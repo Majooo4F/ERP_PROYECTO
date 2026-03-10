@@ -11,7 +11,7 @@ import { Router } from '@angular/router';
 @Component({
   selector: 'app-register',
   standalone: true,
-  imports: [ReactiveFormsModule, CommonModule, ToastModule, RouterLink, InputTextModule, ButtonModule],
+  imports: [ReactiveFormsModule, CommonModule, ToastModule, InputTextModule, ButtonModule],
   providers: [MessageService],
   templateUrl: './register.html'
 })
