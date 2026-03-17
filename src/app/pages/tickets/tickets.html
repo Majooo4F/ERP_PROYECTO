@@ -1,1 +1,119 @@
-<p>tickets works!</p>
+<div class="p-6 bg-gray-50 min-h-screen">
+  <h2 class="text-3xl font-bold mb-4 text-gray-800 border-b pb-2">
+    Lista de Tickets
+  </h2>
+
+  <!-- FILTROS RÁPIDOS COMO BOTONES -->
+  <div class="mb-4 flex gap-2">
+    <button *ngFor="let f of filtros"
+      pButton
+      type="button"
+      label="{{f.label}}"
+      (click)="aplicarFiltroRapido(f.value)"
+      [class.bg-blue-500]="filtroRapido === f.value"
+      class="text-white">
+    </button>
+  </div>
+
+  <!-- BUSQUEDA GLOBAL -->
+  <div class="mb-4">
+    <input
+      pInputText
+      type="text"
+      placeholder="Buscar ticket..."
+      (input)="tabla.filterGlobal($event.target.value, 'contains')"
+      class="w-full md:w-80"
+    />
+  </div>
+
+  <!-- TABLA -->
+  <p-table
+    #tabla
+    [value]="ticketsFiltrados"
+    [paginator]="true"
+    [rows]="10"
+    [globalFilterFields]="['id','titulo','estado','asignado','prioridad']"
+    styleClass="p-datatable-gridlines shadow-md"
+  >
+    <ng-template pTemplate="header">
+      <tr>
+        <th pSortableColumn="id">ID<p-sortIcon field="id"></p-sortIcon></th>
+        <th pSortableColumn="titulo">Título<p-sortIcon field="titulo"></p-sortIcon></th>
+        <th pSortableColumn="estado">Estado<p-sortIcon field="estado"></p-sortIcon></th>
+        <th pSortableColumn="asignado">Asignado a<p-sortIcon field="asignado"></p-sortIcon></th>
+        <th pSortableColumn="prioridad">Prioridad<p-sortIcon field="prioridad"></p-sortIcon></th>
+        <th pSortableColumn="fechaLimite">Fecha límite<p-sortIcon field="fechaLimite"></p-sortIcon></th>
+        <th>Acción</th>
+      </tr>
+
+      <tr>
+        <th></th>
+        <th><input pInputText placeholder="Buscar..." (input)="tabla.filter($event.target.value,'titulo','contains')" /></th>
+        
+        <th>
+          <p-select [options]="estados" placeholder="Estado" (onChange)="tabla.filter($event.value,'estado','equals')"></p-select>
+        </th>
+        <th>
+          <p-select [options]="usuarios" placeholder="Asignado" (onChange)="tabla.filter($event.value,'asignado','equals')"></p-select>
+        </th>
+        <th>
+          <p-select [options]="prioridades" optionLabel="label" optionValue="value" placeholder="Prioridad" (onChange)="tabla.filter($event.value,'prioridad','equals')"></p-select>
+        </th>
+        <th></th>
+        <th></th>
+      </tr>
+    </ng-template>
+
+    <ng-template pTemplate="body" let-ticket>
+      <tr>
+        <td>{{ticket.id}}</td>
+        <td>{{ticket.titulo}}</td>
+        <td>
+          <p-tag [value]="ticket.estado" [severity]="ticket.estado === 'Resuelto' ? 'success' : 'warn'"></p-tag>
+        </td>
+        <td>{{ticket.asignado || 'Sin asignar'}}</td>
+        <td>{{ticket.prioridad}}</td>
+        <td>{{ticket.fechaLimite}}</td>
+        <td class="flex gap-2">
+          <p-button icon="pi pi-pencil" severity="warn" rounded text (click)="editarTicket(ticket)"></p-button>
+          <p-button icon="pi pi-trash" severity="danger" rounded text (click)="eliminarTicket(ticket)"></p-button>
+        </td>
+      </tr>
+    </ng-template>
+  </p-table>
+</div>
+
+<!-- DIALOG EDITAR TICKET -->
+<p-dialog header="Editar Ticket" [(visible)]="displayDialog" [modal]="true" [style]="{ width: '25rem' }">
+  <span class="p-text-secondary block mb-4">Actualiza la información del ticket</span>
+  <form [formGroup]="ticketForm">
+    <div class="flex items-center gap-4 mb-3">
+      <label class="font-semibold w-24">Título</label>
+      <input pInputText class="flex-auto" formControlName="titulo" />
+    </div>
+    <div class="flex items-center gap-4 mb-3">
+      <label class="font-semibold w-24">Estado</label>
+      <p-select [options]="estados" formControlName="estado" class="flex-auto"></p-select>
+    </div>
+    <div class="flex items-center gap-4 mb-3">
+      <label class="font-semibold w-24">Asignado</label>
+      <p-select [options]="usuarios" formControlName="asignado" class="flex-auto"></p-select>
+    </div>
+    <div class="flex items-center gap-4 mb-3">
+      <label class="font-semibold w-24">Prioridad</label>
+      <p-select [options]="prioridades" optionLabel="label" optionValue="value" formControlName="prioridad" class="flex-auto"></p-select>
+    </div>
+    <div class="flex items-center gap-4 mb-4">
+      <label class="font-semibold w-24">Fecha</label>
+      <input pInputText type="date" class="flex-auto" formControlName="fechaLimite" />
+    </div>
+    <div class="flex items-center gap-4 mb-4">
+      <label class="font-semibold w-24">Nuevo comentario</label>
+      <input pInputText class="flex-auto" formControlName="nuevoComentario" placeholder="Agregar comentario..." />
+    </div>
+  </form>
+  <div class="flex justify-end gap-2">
+    <p-button label="Cancelar" severity="secondary" (click)="displayDialog = false"></p-button>
+    <p-button label="Guardar" (click)="guardarCambios()"></p-button>
+  </div>
+</p-dialog>

@@ -1,0 +1,41 @@
+<div class="flex justify-center items-center min-h-screen bg-gray-100">
+  <div class="bg-white p-8 rounded-lg shadow-md" style="width:500px">
+    
+    <h2 class="text-center mb-6 text-xl font-bold text-gray-800">
+      Selecciona tu grupo
+    </h2>
+
+    <p-select 
+      [options]="gruposUsuario" 
+      [(ngModel)]="grupoSeleccionado" 
+      optionLabel="name" 
+      placeholder="Haz clic para elegir un equipo" 
+      class="w-full"
+      styleClass="w-full"
+      (onChange)="onGroupChange($event.value)"
+      [checkmark]="true"
+      [showClear]="true">
+      
+      <ng-template #item let-grupo>
+        <div 
+          class="w-full p-2 rounded flex justify-between items-center transition-all hover:brightness-95"
+          [style.background]="grupo.color"
+          style="color: white"
+        >
+          <span class="font-bold">
+            {{ grupo.name }}
+          </span>
+          <span class="text-sm opacity-90 italic">
+            Modelo: {{ grupo.modelo }}
+          </span>
+        </div>
+      </ng-template>
+
+    </p-select>
+
+    <p class="mt-6 text-sm text-gray-400 text-center italic">
+      Serás redirigido automáticamente al dashboard tras la selección.
+    </p>
+
+  </div>
+</div>

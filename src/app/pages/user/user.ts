@@ -4,6 +4,8 @@ import { ReactiveFormsModule, FormBuilder, Validators, FormGroup, AbstractContro
 import { ToastModule } from 'primeng/toast';
 import { ButtonModule } from 'primeng/button';
 import { MessageService } from 'primeng/api';
+import { TableModule } from 'primeng/table';
+import { CardModule } from 'primeng/card';
 
 @Component({
   selector: 'app-user',
@@ -12,7 +14,7 @@ import { MessageService } from 'primeng/api';
     CommonModule,
     ReactiveFormsModule,
     ToastModule,
-    ButtonModule
+    ButtonModule,TableModule, CardModule
   ],
   providers: [MessageService],
   templateUrl: './user.html',
@@ -54,8 +56,44 @@ export class User {
 
   enableEdit() {
     this.editMode = true;
+    
     this.userForm.enable();
   }
+  tickets = [
+  {
+    id: 1,
+    titulo: 'Error en login',
+    estado: 'Abierto',
+    prioridad: 'Alta',
+    fechaLimite: '2026-03-15'
+  },
+  {
+    id: 2,
+    titulo: 'Actualizar dashboard',
+    estado: 'En progreso',
+    prioridad: 'Media',
+    fechaLimite: '2026-03-20'
+  },
+  {
+    id: 3,
+    titulo: 'Bug en reporte',
+    estado: 'Hecho',
+    prioridad: 'Baja',
+    fechaLimite: '2026-03-05'
+  }
+];
+
+get abiertos() {
+  return this.tickets.filter(t => t.estado === 'Abierto').length;
+}
+
+get enProgreso() {
+  return this.tickets.filter(t => t.estado === 'En progreso').length;
+}
+
+get hechos() {
+  return this.tickets.filter(t => t.estado === 'Hecho').length;
+}
 
   // Validador de mayoría de edad
   ageValidator(control: AbstractControl) {

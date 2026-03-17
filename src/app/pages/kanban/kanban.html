@@ -1,0 +1,177 @@
+<div class="p-6 bg-gray-50 min-h-screen">
+<div class="flex justify-between items-center mb-8">
+  <h1 class="text-3xl font-bold text-black">Kanban Board</h1>
+
+  <div class="flex items-center gap-3">
+    
+    <!-- BOTÓN PRIMERO -->
+    <p-button 
+      label="Nuevo Ticket" 
+      icon="pi pi-plus" 
+      severity="success" 
+      (click)="abrirCrearTicket()">
+    </p-button>
+
+    <!-- TEXTO Y SWITCH DESPUÉS -->
+    <span class="text-sm font-bold text-black">Kanban</span>
+
+    <p-toggleswitch [(ngModel)]="modoLista"></p-toggleswitch>
+
+    <span class="text-sm font-bold text-black">Lista</span>
+
+  </div>
+</div>
+
+<div *ngIf="!modoLista" class="grid grid-cols-1 md:grid-cols-3 gap-6" cdkDropListGroup>
+
+<div class="bg-gray-100 p-4 rounded-lg shadow-inner min-h-[500px]">
+<h3 class="font-bold mb-4 text-black flex items-center gap-2"><span class="w-3 h-3 rounded-full bg-yellow-500"></span>PENDIENTES</h3>
+
+<div id="list-pendientes" cdkDropList [cdkDropListData]="pendientes" (cdkDropListDropped)="drop($event)" class="min-h-[400px]">
+
+<div *ngFor="let t of pendientes" cdkDrag (click)="abrirTicket(t)" class="bg-white p-4 mb-3 rounded shadow-sm border-l-4 border-yellow-500 cursor-pointer hover:shadow-md">
+<div class="font-bold text-black">{{ t.titulo }}</div>
+<div class="text-xs text-black mt-1">Estado: {{ t.estado }}</div>
+
+<div class="flex justify-between items-center mt-3">
+<small class="text-black font-semibold"><i class="pi pi-user mr-1 text-[10px]"></i>{{ t.asignado }}</small>
+<p-tag [value]="t.prioridad" [severity]="getSeverity(t.prioridad)"></p-tag>
+</div>
+
+<div class="text-xs text-black mt-2 border-t pt-2">{{ t.fecha }}</div>
+</div>
+
+</div>
+</div>
+
+<div class="bg-gray-100 p-4 rounded-lg shadow-inner min-h-[500px]">
+<h3 class="font-bold mb-4 text-black flex items-center gap-2"><span class="w-3 h-3 rounded-full bg-blue-500"></span>EN PROGRESO</h3>
+
+<div id="list-progreso" cdkDropList [cdkDropListData]="progreso" (cdkDropListDropped)="drop($event)" class="min-h-[400px]">
+
+<div *ngFor="let t of progreso" cdkDrag (click)="abrirTicket(t)" class="bg-white p-4 mb-3 rounded shadow-sm border-l-4 border-blue-500 cursor-pointer hover:shadow-md">
+<div class="font-bold text-black">{{ t.titulo }}</div>
+<div class="text-xs text-black mt-1">Estado: {{ t.estado }}</div>
+
+<div class="flex justify-between items-center mt-3">
+<small class="text-black font-semibold">{{ t.asignado }}</small>
+<p-tag [value]="t.prioridad" [severity]="getSeverity(t.prioridad)"></p-tag>
+</div>
+
+<div class="text-xs text-black mt-2 border-t pt-2">{{ t.fecha }}</div>
+</div>
+
+</div>
+</div>
+
+<div class="bg-gray-100 p-4 rounded-lg shadow-inner min-h-[500px]">
+<h3 class="font-bold mb-4 text-black flex items-center gap-2"><span class="w-3 h-3 rounded-full bg-green-500"></span>HECHO</h3>
+
+<div id="list-hecho" cdkDropList [cdkDropListData]="hecho" (cdkDropListDropped)="drop($event)" class="min-h-[400px]">
+
+<div *ngFor="let t of hecho" cdkDrag (click)="abrirTicket(t)" class="bg-white p-4 mb-3 rounded shadow-sm border-l-4 border-green-500 cursor-pointer">
+<div class="font-bold text-black line-through">{{ t.titulo }}</div>
+<div class="text-xs text-black mt-1">Estado: {{ t.estado }}</div>
+
+<div class="flex justify-between items-center mt-3">
+<small class="text-black font-semibold">{{ t.asignado }}</small>
+<i class="pi pi-check-circle text-green-600"></i>
+</div>
+
+<div class="text-xs text-black mt-2 border-t pt-2">{{ t.fecha }}</div>
+</div>
+
+</div>
+</div>
+
+</div>
+
+<div *ngIf="modoLista" class="bg-white rounded shadow p-4">
+<table class="w-full">
+<thead class="border-b text-left text-black font-bold">
+<tr>
+<th class="p-3">Título</th>
+<th class="p-3">Asignado</th>
+<th class="p-3">Prioridad</th>
+<th class="p-3">Estado</th>
+<th class="p-3">Fecha</th>
+</tr>
+</thead>
+
+
+<tbody>
+<tr *ngFor="let t of [...pendientes, ...progreso, ...hecho]" class="border-b hover:bg-gray-100 cursor-pointer text-black font-semibold" (click)="abrirTicket(t)">
+<td class="p-3">{{ t.titulo }}</td>
+<td class="p-3">{{ t.asignado }}</td>
+<td class="p-3"><p-tag [value]="t.prioridad" [severity]="getSeverity(t.prioridad)"></p-tag></td>
+<td class="p-3">{{ t.estado }}</td>
+<td class="p-3">{{ t.fecha }}</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+
+<p-dialog header="Editar Ticket" [(visible)]="visible" [modal]="true" [style]="{ width: '30rem' }" styleClass="p-fluid">
+<div class="flex flex-col gap-4">
+
+<div>
+<label class="font-semibold block mb-1">Título</label>
+<input pInputText [(ngModel)]="ticketSeleccionado.titulo" class="w-full"/>
+</div>
+
+<div>
+<label class="font-semibold block mb-1">Asignado</label>
+<input pInputText [(ngModel)]="ticketSeleccionado.asignado" class="w-full"/>
+</div>
+
+<div>
+<label class="font-semibold block mb-1">Prioridad</label>
+<p-select [options]="prioridades" [(ngModel)]="ticketSeleccionado.prioridad" optionLabel="label" optionValue="value" placeholder="Seleccione prioridad" appendTo="body" class="w-full"></p-select>
+</div>
+
+<div>
+<label class="font-semibold block mb-1">Fecha</label>
+<input pInputText type="date" [(ngModel)]="ticketSeleccionado.fecha" class="w-full"/>
+</div>
+
+</div>
+
+<div class="flex justify-end gap-2 mt-6">
+<p-button label="Cancelar" icon="pi pi-times" severity="secondary" variant="text" (click)="visible=false"></p-button>
+<p-button label="Guardar" icon="pi pi-check" (click)="guardarTicket()"></p-button>
+</div>
+</p-dialog>
+
+<p-dialog header="Crear Ticket" [(visible)]="visibleCrear" [modal]="true" [style]="{ width: '30rem' }" styleClass="p-fluid">
+
+<div class="flex flex-col gap-4">
+
+<div>
+<label class="font-semibold block mb-1">Título</label>
+<input pInputText [(ngModel)]="nuevoTicket.titulo" class="w-full"/>
+</div>
+
+<div>
+<label class="font-semibold block mb-1">Asignado</label>
+<input pInputText [(ngModel)]="nuevoTicket.asignado" class="w-full"/>
+</div>
+
+<div>
+<label class="font-semibold block mb-1">Prioridad</label>
+<p-select [options]="prioridades" [(ngModel)]="nuevoTicket.prioridad" optionLabel="label" optionValue="value" placeholder="Seleccione prioridad" class="w-full"></p-select>
+</div>
+
+<div>
+<label class="font-semibold block mb-1">Fecha</label>
+<input pInputText type="date" [(ngModel)]="nuevoTicket.fecha" class="w-full"/>
+</div>
+
+</div>
+
+<div class="flex justify-end gap-2 mt-6">
+<p-button label="Cancelar" icon="pi pi-times" severity="secondary" (click)="visibleCrear=false"></p-button>
+<p-button label="Crear Ticket" icon="pi pi-check" severity="success" (click)="crearTicket()"></p-button>
+</div>
+
+</p-dialog>

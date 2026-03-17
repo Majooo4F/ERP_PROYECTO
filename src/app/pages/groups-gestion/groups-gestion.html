@@ -1,0 +1,101 @@
+<div class="card">
+<!-- HEADER -->
+<div class="flex justify-between items-center mb-4">
+  <div>
+    <span class="text-gray-500 text-sm">Configuración del Espacio</span>
+    <h2 class="text-xl font-bold text-gray-800">{{ groupName }}</h2>
+  </div>
+
+  <p-button
+    label="Añadir por Email"
+    icon="pi pi-user-plus"
+    severity="info"
+    class="text-white"
+    (click)="openNew()">
+  </p-button>
+</div>
+
+<!-- CONFIGURACIÓN DEL GRUPO -->
+<div class="flex items-center gap-3 mb-4">
+  <label class="font-semibold text-gray-700">Nombre del Grupo</label>
+  <input 
+    pInputText 
+    [(ngModel)]="groupName" 
+    class="w-64 border border-gray-300 rounded px-2 py-1 text-gray-800" 
+    placeholder="Ingresa nombre del grupo" 
+  />
+  <p-button 
+    label="Guardar" 
+    icon="pi pi-save" 
+    severity="success" 
+    class="text-white"
+    (click)="saveGroup()">
+  </p-button>
+</div>
+
+  <!-- BUSCAR MIEMBRO -->
+  <div class="flex justify-end mb-3">
+    <span class="p-input-icon-left">
+      <i class="pi pi-search"></i>
+      <input pInputText type="text" placeholder="Buscar miembro..." class="w-64"
+        (input)="dt.filterGlobal($event.target.value, 'contains')" />
+    </span>
+  </div>
+
+  <!-- TABLA DE USUARIOS -->
+  <p-table #dt [value]="users" [paginator]="true" [rows]="5"
+    [globalFilterFields]="['name','email','role']" responsiveLayout="scroll"
+    [tableStyle]="{ 'min-width': '60rem' }">
+
+    <ng-template pTemplate="header">
+      <tr>
+        <th pSortableColumn="name">Nombre <p-sortIcon field="name"></p-sortIcon></th>
+        <th pSortableColumn="email">Email <p-sortIcon field="email"></p-sortIcon></th>
+        <th>Rol</th>
+        <th>Fecha Ingreso</th>
+        <th style="width:150px">Acciones</th>
+      </tr>
+    </ng-template>
+
+    <ng-template pTemplate="body" let-user let-i="rowIndex">
+      <tr>
+        <td class="font-semibold">{{ user.name }}</td>
+        <td>{{ user.email }}</td>
+        <td>
+          <span class="px-3 py-1 border-round text-xs text-white"
+            [ngClass]="user.role === 'Admin' ? 'bg-red-500' : 'bg-blue-500'">
+            {{ user.role }}
+          </span>
+        </td>
+        <td>{{ user.date }}</td>
+        <td>
+          <div class="flex gap-2">
+            <p-button icon="pi pi-trash" severity="danger" [rounded]="true" [outlined]="true"
+              (click)="deleteUser(i)">
+            </p-button>
+          </div>
+        </td>
+      </tr>
+    </ng-template>
+
+  </p-table>
+
+  <!-- DIALOGO PARA AÑADIR USUARIO -->
+  <p-dialog header="Añadir usuario" [modal]="true" [(visible)]="visible" [style]="{ width: '25rem' }"
+    [draggable]="false" [resizable]="false">
+
+    <span class="block mb-4 text-surface-500">Añadir usuario al grupo por email</span>
+
+    <div class="flex items-center gap-4 mb-4">
+      <label class="font-semibold w-24">Email</label>
+      <input pInputText [(ngModel)]="user.email" class="flex-auto" autocomplete="off">
+    </div>
+
+    <div class="flex justify-end gap-2">
+      <p-button label="Cancelar" severity="secondary" (click)="visible=false"></p-button>
+      <p-button label="Añadir" severity="success" (click)="saveUser()"></p-button>
+    </div>
+
+  </p-dialog>
+
+</div>

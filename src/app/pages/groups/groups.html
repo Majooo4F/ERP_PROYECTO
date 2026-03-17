@@ -139,16 +139,15 @@
 </p-dialog>
 
 </div> -->
-<div *ifHasPermission="'grupos:ver'" class="min-h-screen p-6 surface-ground">
+<div *ifHasPermission="'group:view'" class="min-h-screen p-6 surface-ground">
 
   <div style="max-width: 1100px; margin: auto;">
     
     <div class="flex justify-content-between gap-4 mb-5">
-
       <div style="width: 48%;">
         <p-card styleClass="shadow-3 border-round-xl text-center">
           <div class="py-4">
-            <div class="text-xl font-semibold mb-2">Total Usuarios</div>
+            <div class="text-xl font-semibold mb-2">Total Grupos</div>
             <span class="text-4xl font-bold text-blue-500">
               {{ registros.length }}
             </span>
@@ -159,22 +158,19 @@
       <div style="width: 48%;">
         <p-card styleClass="shadow-3 border-round-xl text-center">
           <div class="py-4">
-            <div class="text-xl font-semibold mb-2">Advance</div>
-            <span class="text-4xl font-bold text-gray-600">Card</span>
+            <div class="text-xl font-semibold mb-2">Administración</div>
+            <span class="text-4xl font-bold text-gray-600">Grupos</span>
           </div>
         </p-card>
       </div>
-
     </div>
 
     <div class="card">
-
       <p-confirmDialog></p-confirmDialog>
 
-      <!-- BOTÓN AGREGAR SOLO ADMIN -->
       <div class="flex justify-content-end mb-3">
         <p-button
-          *ifHasPermission="'grupos:crear'"
+          *ifHasPermission="'group:add'"
           label="Agregar"
           icon="pi pi-plus"
           severity="success"
@@ -183,7 +179,6 @@
       </div>
 
       <p-table [value]="registros" responsiveLayout="scroll">
-
         <ng-template pTemplate="header">
           <tr>
             <th>Nivel</th>
@@ -198,98 +193,185 @@
 
         <ng-template pTemplate="body" let-grupo let-i="rowIndex">
           <tr>
-
             <td>{{ grupo.nivel }}</td>
             <td>{{ grupo.autor }}</td>
             <td>{{ grupo.nombre }}</td>
             <td>{{ grupo.integrantes }}</td>
             <td>{{ grupo.tickets }}</td>
-
             <td style="max-width:250px; white-space:normal; word-break:break-word;">
               {{ grupo.descripcion }}
             </td>
-
             <td>
               <div class="flex gap-2">
-
-                <!-- EDITAR SOLO ADMIN -->
                 <p-button
-                  *ifHasPermission="'grupos:editar'"
+                  *ifHasPermission="'group:edit'"
                   icon="pi pi-pencil"
                   severity="info"
                   [rounded]="true"
                   [text]="true"
                   (click)="edit(grupo,i)">
                 </p-button>
-
-                <!-- ELIMINAR SOLO ADMIN -->
                 <p-button
-                  *ifHasPermission="'grupos:eliminar'"
+                  *ifHasPermission="'group:delete'"
                   icon="pi pi-trash"
                   severity="danger"
                   [rounded]="true"
                   [text]="true"
                   (click)="confirmDelete(i)">
                 </p-button>
-
               </div>
             </td>
-
           </tr>
         </ng-template>
-
       </p-table>
-
     </div>
   </div>
 
-  <!-- DIALOGO CREAR / EDITAR -->
-  <p-dialog
-    *ifHasPermission="['grupos:crear','grupos:editar']"
-    [header]="isEdit ? 'Editar Grupo' : 'Nuevo Grupo'"
-    [(visible)]="visible"
-    [modal]="true"
-    [style]="{ width: '25rem' }">
+<p-dialog
+  *ifHasPermission="['group:add','group:edit']"
+  [header]="isEdit ? 'Editar Grupo' : 'Nuevo Grupo'"
+  [(visible)]="visible"
+  [modal]="true"
+  [style]="{ width: '42rem' }"
+  [breakpoints]="{ '960px': '75vw', '641px': '90vw' }">
 
-    <span class="block mb-4">
-      {{ isEdit ? 'Actualiza la información del grupo.' : 'Completa la información.' }}
-    </span>
+  <div class="p-fluid grid">
 
-    <div class="flex items-center gap-4 mb-3">
-      <label class="font-semibold w-6rem">Nivel</label>
-      <input pInputText [(ngModel)]="form.nivel" />
+    <!-- NIVEL -->
+    <div class="field col-12 md:col-6">
+      <label class="font-semibold mb-2 block">Nivel</label>
+      <input
+        pInputText
+        [(ngModel)]="form.nivel"
+        placeholder="Ej. Nivel 1" />
     </div>
 
-    <div class="flex items-center gap-4 mb-3">
-      <label class="font-semibold w-6rem">Autor</label>
-      <input pInputText [(ngModel)]="form.autor" />
+    <!-- AUTOR -->
+    <div class="field col-12 md:col-6">
+      <label class="font-semibold mb-2 block">Autor</label>
+      <input
+        pInputText
+        [(ngModel)]="form.autor"
+        placeholder="Nombre del autor" />
     </div>
 
-    <div class="flex items-center gap-4 mb-3">
-      <label class="font-semibold w-6rem">Nombre</label>
-      <input pInputText [(ngModel)]="form.nombre" />
+    <!-- NOMBRE GRUPO -->
+    <div class="field col-12">
+      <label class="font-semibold mb-2 block">Nombre del Grupo</label>
+      <input
+        pInputText
+        [(ngModel)]="form.nombre"
+        placeholder="Nombre del grupo" />
     </div>
 
-    <div class="flex items-center gap-4 mb-3">
-      <label class="font-semibold w-6rem">Integrantes</label>
-      <input pInputText type="number" [(ngModel)]="form.integrantes" />
+    <!-- DESCRIPCIÓN -->
+    <div class="field col-12">
+      <label class="font-semibold mb-2 block">Descripción</label>
+      <textarea
+        pInputTextarea
+        rows="3"
+        [(ngModel)]="form.descripcion"
+        placeholder="Describe el objetivo del grupo">
+      </textarea>
     </div>
 
-    <div class="flex items-center gap-4 mb-3">
-      <label class="font-semibold w-6rem">Tickets</label>
-      <input pInputText type="number" [(ngModel)]="form.tickets" />
+    <!-- AGREGAR USUARIO -->
+    <div class="field col-12">
+      <label class="font-semibold text-primary block mb-2">
+        Agregar usuario por email
+      </label>
+
+      <div class="flex gap-2">
+
+        <div class="p-inputgroup flex-1">
+          <span class="p-inputgroup-addon">
+            <i class="pi pi-envelope"></i>
+          </span>
+
+          <input
+            pInputText
+            placeholder="correo@ejemplo.com"
+            [(ngModel)]="nuevoEmail"
+            (keyup.enter)="agregarUsuario()" />
+        </div>
+
+        <p-button
+          icon="pi pi-plus"
+          severity="success"
+          (click)="agregarUsuario()">
+        </p-button>
+
+      </div>
     </div>
 
-    <div class="flex flex-column gap-2 mb-3">
-      <label class="font-semibold">Descripción</label>
-      <textarea pInputTextarea rows="3" [(ngModel)]="form.descripcion"></textarea>
+    <!-- LISTA DE USUARIOS -->
+    <div class="field col-12">
+  <label class="font-semibold block mb-2">
+    Usuarios del Grupo ({{form.usuarios?.length || 0}})
+  </label>
+
+  <div class="surface-card border-1 surface-border border-round p-2" 
+       style="max-height:200px; overflow-y:auto;">
+    
+    <div *ngFor="let user of form.usuarios; let i=index" 
+         class="flex align-items-center justify-content-between p-2 border-round mb-2 surface-ground hover:surface-100 transition-duration-150">
+      
+      <div class="flex align-items-center gap-3">
+        <p-avatar 
+          [label]="user.nombre.charAt(0).toUpperCase()" 
+          shape="circle" 
+          styleClass="bg-blue-500 text-white font-bold"
+          size="large">
+        </p-avatar>
+
+        <div class="flex flex-column">
+          <span class="font-bold text-900">{{user.nombre}}</span>
+          <small class="text-600">{{user.email}}</small>
+        </div>
+      </div>
+
+      <p-button 
+        icon="pi pi-trash" 
+        severity="danger" 
+        [text]="true" 
+        [rounded]="true"
+        (click)="eliminarUsuario(i)"
+        pTooltip="Quitar usuario"
+        tooltipPosition="left">
+      </p-button>
+
     </div>
 
-    <div class="flex justify-end gap-2">
-      <p-button label="Cancel" severity="secondary" (click)="visible=false"></p-button>
-      <p-button label="Save" (click)="save()"></p-button>
+    <div *ngIf="!form.usuarios?.length" class="text-center p-4 text-500 italic">
+      <i class="pi pi-users mb-2" style="font-size: 2rem"></i>
+      <p>No hay usuarios asignados a este grupo.</p>
     </div>
 
-  </p-dialog>
+  </div>
+</div>
+
+  </div>
+
+  <!-- BOTONES -->
+  <ng-template pTemplate="footer">
+    <div class="flex justify-content-end gap-2 pt-2">
+
+      <p-button
+        label="Cancelar"
+        severity="secondary"
+        [text]="true"
+        (click)="visible=false">
+      </p-button>
+
+      <p-button
+        label="Guardar"
+        icon="pi pi-check"
+        (click)="save()">
+      </p-button>
+
+    </div>
+  </ng-template>
+
+</p-dialog>
 
 </div>

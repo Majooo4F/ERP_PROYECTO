@@ -1,16 +1,110 @@
-<div class="grid" style="gap:20px; display:grid; grid-template-columns: repeat(auto-fit, minmax(250px,1fr));">
+<div class="min-h-screen bg-gray-50 p-8">
 
-  <p-card header="Actividad Reciente">
-    No hay movimientos en las últimas 24 horas.
-  </p-card>
+  <!-- BIENVENIDA -->
+  <div class="text-center mb-10">
 
-  <p-card header="Perfil de Usuario">
-    Administrador <br>
-    admin@practica.com
-  </p-card>
+    <h1 class="text-4xl font-bold text-black">
+      Bienvenido <span class="text-blue-600 capitalize">{{ usuario }}</span>
+    </h1>
 
-  <p-card header="Estado del Sistema">
-    <span style="color:green;">Operativo</span>
-  </p-card>
+    <p class="text-gray-700 mt-2 text-lg">
+      Selecciona un grupo para gestionar sus tickets
+    </p>
+
+  </div>
+
+
+  <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+
+    <p-card
+      *ngFor="let grupo of grupos"
+      class="cursor-pointer shadow hover:shadow-lg transition"
+      (click)="entrarGrupo(grupo)"
+      [style]="{'border-top':'6px solid '+grupo.color}"
+    >
+
+      <div class="flex flex-col gap-2">
+
+        <h2 class="text-xl font-bold">
+          {{ grupo.name }}
+        </h2>
+
+        <span class="text-gray-500">
+          Grupo
+        </span>
+
+        <div
+          class="text-lg font-semibold"
+          [style.color]="grupo.color"
+        >
+          {{ grupo.modelo }}
+        </div>
+
+      </div>
+
+    </p-card>
+
+  </div>
 
 </div>
+
+
+
+<!-- SELECTOR DE GRUPO -->
+
+<!-- <div *ngIf="!grupoConfirmado"
+     class="flex justify-content-center align-items-center"
+     style="min-height:100vh">
+
+  <p-card header="Selecciona tu Grupo" [style]="{ width: '25rem' }">
+
+    <p-select
+      [options]="grupos"
+      [(ngModel)]="selectedGroup"
+      optionLabel="name"
+      placeholder="Selecciona un grupo"
+      styleClass="w-full"
+      (onChange)="confirmGroup()">
+    </p-select>
+
+  </p-card>
+
+</div> -->
+
+
+<!-- DASHBOARD -->
+
+<!-- <div *ngIf="grupoConfirmado">
+
+  <!-- CARD GRUPO ACTUAL -->
+
+  <!-- <p-card header="Grupo Actual" class="mb-3">
+
+    <div class="flex align-items-center gap-2">
+      <i class="pi pi-users"></i>
+      <span class="font-bold">{{ selectedGroup.name }}</span>
+    </div>
+
+  </p-card> -->
+
+
+  <!-- CARDS DEL DASHBOARD -->
+
+  <!-- <div class="grid" style="gap:20px; display:grid; grid-template-columns: repeat(auto-fit, minmax(250px,1fr));">
+
+    <p-card header="Actividad Reciente">
+      No hay movimientos en las últimas 24 horas.
+    </p-card>
+
+    <p-card header="Perfil de Usuario">
+      Administrador <br>
+      admin@practica.com
+    </p-card>
+
+    <p-card header="Estado del Sistema">
+      <span style="color:green;">Operativo</span>
+    </p-card>
+
+  </div>
+
+</div> --> 

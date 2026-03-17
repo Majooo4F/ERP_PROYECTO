@@ -4,6 +4,8 @@ import { routes } from './app.routes';
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
 import { providePrimeNG } from 'primeng/config';
 import Lara from '@primeuix/themes/lara';
+import { provideAnimations } from '@angular/platform-browser/animations';
+
 
 
 export const appConfig: ApplicationConfig = {
@@ -12,6 +14,7 @@ export const appConfig: ApplicationConfig = {
     provideZonelessChangeDetection(),
     provideRouter(routes),
     provideAnimationsAsync(),
+    provideAnimations(),
     providePrimeNG({
       theme: {
         preset: Lara,

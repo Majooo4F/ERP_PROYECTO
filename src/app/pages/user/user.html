@@ -1,12 +1,19 @@
 <p-toast></p-toast>
 
 <div class="flex min-h-screen items-center justify-center bg-slate-100 p-6 py-12">
-  <div class="w-full max-w-2xl rounded-2xl bg-white p-8 shadow-2xl border border-gray-100">
+  <div class="w-full max-w-4xl rounded-2xl bg-white p-8 shadow-2xl border border-gray-100">
+
+    
+    <!-- <div class="flex justify-content-center mb-6">
+      <img src="https://i.pravatar.cc/100"
+           class="rounded-full border shadow-md">
+    </div> -->
 
     <h1 class="text-3xl font-bold text-black text-center mb-8">
       Perfil de Usuarios
     </h1>
 
+    <!-- FORMULARIO -->
     <form [formGroup]="userForm" (ngSubmit)="onSave()" class="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4">
 
       <div class="flex flex-col gap-1">
@@ -14,9 +21,6 @@
         <input formControlName="usuario" type="text"
           [ngClass]="{'border-red-500': f['usuario'].touched && f['usuario'].invalid}"
           class="p-3 border rounded-lg outline-none focus:ring-2 focus:ring-blue-200 text-black bg-white disabled:bg-gray-50">
-        <small *ngIf="f['usuario'].touched && f['usuario'].errors?.['required']" class="text-red-500">
-          El usuario es obligatorio
-        </small>
       </div>
 
       <div class="flex flex-col gap-1">
@@ -24,9 +28,6 @@
         <input formControlName="nombreCompleto" type="text"
           [ngClass]="{'border-red-500': f['nombreCompleto'].touched && f['nombreCompleto'].invalid}"
           class="p-3 border rounded-lg outline-none focus:ring-2 focus:ring-blue-200 text-black bg-white disabled:bg-gray-50">
-        <small *ngIf="f['nombreCompleto'].touched && f['nombreCompleto'].errors?.['required']" class="text-red-500">
-          El nombre es obligatorio
-        </small>
       </div>
 
       <div class="flex flex-col gap-1 md:col-span-2">
@@ -34,8 +35,6 @@
         <input formControlName="email" type="email"
           [ngClass]="{'border-red-500': f['email'].touched && f['email'].invalid}"
           class="p-3 border rounded-lg outline-none focus:ring-2 focus:ring-blue-200 text-black bg-white disabled:bg-gray-50">
-        <small *ngIf="f['email'].touched && f['email'].errors?.['required']" class="text-red-500">El email es obligatorio</small>
-        <small *ngIf="f['email'].touched && f['email'].errors?.['email']" class="text-red-500">Formato de email inválido</small>
       </div>
 
       <div class="flex flex-col gap-1">
@@ -43,9 +42,6 @@
         <input formControlName="telefono" type="text" maxlength="10"
           [ngClass]="{'border-red-500': f['telefono'].touched && f['telefono'].invalid}"
           class="p-3 border rounded-lg outline-none focus:ring-2 focus:ring-blue-200 text-black bg-white disabled:bg-gray-50">
-        <small *ngIf="f['telefono'].touched && f['telefono'].errors?.['pattern']" class="text-red-500">
-          Debe contener exactamente 10 números
-        </small>
       </div>
 
       <div class="flex flex-col gap-1">
@@ -53,54 +49,103 @@
         <input formControlName="fechaNacimiento" type="date"
           [ngClass]="{'border-red-500': f['fechaNacimiento'].touched && f['fechaNacimiento'].invalid}"
           class="p-3 border rounded-lg outline-none focus:ring-2 focus:ring-blue-200 text-black bg-white disabled:bg-gray-50">
-        <small *ngIf="f['fechaNacimiento'].touched && f['fechaNacimiento'].errors?.['menorDeEdad']" class="text-red-500">
-          Debes ser mayor de 18 años
-        </small>
       </div>
 
       <div class="flex flex-col gap-1 relative">
         <label class="text-sm font-bold text-gray-700">Contraseña</label>
-        <div class="password-wrapper relative">
+
+        <div class="relative">
           <input [type]="showPassword ? 'text' : 'password'" formControlName="password"
-            [ngClass]="{'border-red-500': f['password'].touched && f['password'].invalid}"
             class="p-3 border rounded-lg outline-none focus:ring-2 focus:ring-blue-200 text-black bg-white disabled:bg-gray-50 w-full pr-12">
-          
-          <button type="button" (click)="togglePassword()" class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700 z-10">
+
+          <button type="button"
+                  (click)="togglePassword()"
+                  class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500">
             <i [class]="showPassword ? 'pi pi-eye' : 'pi pi-eye-slash'"></i>
           </button>
         </div>
-        <small *ngIf="f['password'].touched && f['password'].errors?.['pattern']" class="text-red-500 text-xs mt-1 block">
-          Mínimo 8 caracteres, 1 Mayúscula, 1 Número y 1 Carácter Especial
-        </small>
       </div>
 
       <div class="flex flex-col gap-1">
         <label class="text-sm font-bold text-gray-700">Confirmar Contraseña</label>
         <input [type]="showPassword ? 'text' : 'password'" formControlName="confirmPassword"
-          [ngClass]="{'border-red-500': f['confirmPassword'].touched && (f['confirmPassword'].invalid || userForm.errors?.['notMatching'])}"
           class="p-3 border rounded-lg outline-none focus:ring-2 focus:ring-blue-200 text-black bg-white disabled:bg-gray-50">
-        <small *ngIf="f['confirmPassword'].touched && userForm.errors?.['notMatching']" class="text-red-500">
-          Las contraseñas no coinciden
-        </small>
       </div>
 
       <div class="md:col-span-2 mt-8 flex gap-4 justify-center">
-        <p-button *ngIf="!editMode" 
-                  label="Editar Perfil" 
-                  icon="pi pi-pencil" 
-                  styleClass="p-button-outlined p-button-secondary" 
+        <p-button *ngIf="!editMode"
+                  label="Editar Perfil"
+                  icon="pi pi-pencil"
+                  styleClass="p-button-outlined p-button-secondary"
                   (onClick)="enableEdit()">
         </p-button>
 
-        <p-button *ngIf="editMode" 
-                  label="Guardar Cambios" 
-                  icon="pi pi-check" 
-                  severity="success" 
+        <p-button *ngIf="editMode"
+                  label="Guardar Cambios"
+                  icon="pi pi-check"
+                  severity="success"
                   type="submit"
                   [disabled]="userForm.invalid">
         </p-button>
       </div>
 
     </form>
+
+    <!-- RESUMEN DE TICKETS -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-10">
+
+      <p-card header="Abiertos">
+        <h2 class="text-2xl font-bold text-blue-600 text-center">
+          {{ abiertos }}
+        </h2>
+      </p-card>
+
+      <p-card header="En Progreso">
+        <h2 class="text-2xl font-bold text-yellow-600 text-center">
+          {{ enProgreso }}
+        </h2>
+      </p-card>
+
+      <p-card header="Hechos">
+        <h2 class="text-2xl font-bold text-green-600 text-center">
+          {{ hechos }}
+        </h2>
+      </p-card>
+
+    </div>
+
+    <!-- TABLA DE TICKETS -->
+    <div class="mt-8">
+
+      <p-card header="Tickets Asignados">
+
+        <p-table [value]="tickets" responsiveLayout="scroll">
+
+          <ng-template pTemplate="header">
+            <tr>
+              <th>ID</th>
+              <th>Título</th>
+              <th>Estado</th>
+              <th>Prioridad</th>
+              <th>Fecha Límite</th>
+            </tr>
+          </ng-template>
+
+          <ng-template pTemplate="body" let-ticket>
+            <tr>
+              <td>{{ticket.id}}</td>
+              <td>{{ticket.titulo}}</td>
+              <td>{{ticket.estado}}</td>
+              <td>{{ticket.prioridad}}</td>
+              <td>{{ticket.fechaLimite}}</td>
+            </tr>
+          </ng-template>
+
+        </p-table>
+
+      </p-card>
+
+    </div>
+
   </div>
 </div>
