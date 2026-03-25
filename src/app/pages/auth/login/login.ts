@@ -1,12 +1,110 @@
 
-import { Component } from '@angular/core';
+// import { Component } from '@angular/core';
+// import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
+// import { CommonModule } from '@angular/common';
+// import { Router, RouterLink } from '@angular/router';
+// import { MessageService } from 'primeng/api';
+// import { ToastModule } from 'primeng/toast';
+// import { ButtonModule } from 'primeng/button';
+// import { PermissionService } from '../../../services/permission.service';
+
+// @Component({
+//   selector: 'app-login',
+//   standalone: true,
+//   imports: [ReactiveFormsModule, CommonModule, ToastModule, ButtonModule, RouterLink],
+//   providers: [MessageService],
+//   templateUrl: './login.html'
+// })
+// export class Login {
+
+//   loginForm: FormGroup;
+
+//   constructor(
+//     private fb: FormBuilder,
+//     private messageService: MessageService,
+//     private router: Router,
+//     private permissionSvc: PermissionService
+//   ) {
+
+//     this.loginForm = this.fb.group({
+//       email: ['', [Validators.required, Validators.email]],
+//       password: ['', [Validators.required]]
+//     });
+
+//   }
+
+//   onSubmit() {
+
+//     if (this.loginForm.valid) {
+
+//       const { email, password } = this.loginForm.value;
+
+//       let permisos: string[] = [];
+
+//       if (email === 'admin@practica.com' && password === 'Password123!') {
+
+//   permisos = [
+    
+//     'user:view',
+//     'user:add',
+//     'user:edit',
+//     'user:delete',
+
+//     'group:view',
+//     'group:add',
+//     'group:edit',
+//     'group:delete',
+
+//     'ticket:view',
+//     'ticket:add',
+//     'ticket:edit',
+//     'ticket:delete',
+
+//     'report:view'
+//   ];
+
+// } else if (email === 'user@practica.com' && password === 'Password123!') {
+
+//   permisos = [
+    
+//     'user:view',
+
+    
+//     'group:view',
+
+//      'ticket:view',
+//     'ticket:add',
+//     'ticket:edit',
+//     'ticket:delete',
+//     'ticket:view'
+//   ];
+
+// } else {
+//   alert('Correo o contraseña incorrectos');
+//   return;
+// }
+
+//       this.permissionSvc.setPermissions(permisos);
+
+// localStorage.setItem('usuario', email);
+
+// this.router.navigate(['/home']);
+
+//     }
+
+//   }
+
+// } 
+
+import { Component, inject, PLATFORM_ID } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
-import { CommonModule } from '@angular/common';
+import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { Router, RouterLink } from '@angular/router';
 import { MessageService } from 'primeng/api';
 import { ToastModule } from 'primeng/toast';
 import { ButtonModule } from 'primeng/button';
 import { PermissionService } from '../../../services/permission.service';
+import { Auth } from '../../../services/auth';
 
 @Component({
   selector: 'app-login',
@@ -19,11 +117,15 @@ export class Login {
 
   loginForm: FormGroup;
 
+  private platformId = inject(PLATFORM_ID);
+  private isBrowser = isPlatformBrowser(this.platformId);
+
   constructor(
     private fb: FormBuilder,
     private messageService: MessageService,
     private router: Router,
-    private permissionSvc: PermissionService
+    private permissionSvc: PermissionService,
+    private auth: Auth
   ) {
 
     this.loginForm = this.fb.group({
@@ -39,59 +141,41 @@ export class Login {
 
       const { email, password } = this.loginForm.value;
 
-      let permisos: string[] = [];
+      this.auth.login(email, password).subscribe({
 
-      if (email === 'admin@practica.com' && password === 'Password123!') {
+        next: (response) => {
 
-  permisos = [
-    
-    'user:view',
-    'user:add',
-    'user:edit',
-    'user:delete',
+  console.log('API response:', response);
 
-    'group:view',
-    'group:add',
-    'group:edit',
-    'group:delete',
+  // 🔥 VALIDAR permisos antes de guardar
+  if (response.permissions) {
+    this.permissionSvc.setPermissions(response.permissions);
+  }
 
-    'ticket:view',
-    'ticket:add',
-    'ticket:edit',
-    'ticket:delete',
+  if (this.isBrowser) {
+    localStorage.setItem('usuario', response.email);
+  }
 
-    'report:view'
-  ];
+  // 🔥 VALIDAR token
+  if (response.token) {
+    this.auth.setToken(response.token);
+  }
 
-} else if (email === 'user@practica.com' && password === 'Password123!') {
+  this.router.navigate(['/home']);
+},
 
-  permisos = [
-    
-    'user:view',
+        error: () => {
+          this.messageService.add({
+            severity: 'error',
+            summary: 'Error',
+            detail: 'Correo o contraseña incorrectos'
+          });
+        }
 
-    
-    'group:view',
-
-     'ticket:view',
-    'ticket:add',
-    'ticket:edit',
-    'ticket:delete',
-    'ticket:view'
-  ];
-
-} else {
-  alert('Correo o contraseña incorrectos');
-  return;
-}
-
-      this.permissionSvc.setPermissions(permisos);
-
-localStorage.setItem('usuario', email);
-
-this.router.navigate(['/home']);
+      });
 
     }
 
   }
 
-} 
+}

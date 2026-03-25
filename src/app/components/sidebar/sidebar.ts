@@ -133,7 +133,7 @@ export class Sidebar implements OnInit {
           label: 'Grupos',
           icon: 'pi pi-th-large',
           routerLink: '/groups',
-          visible: this.permsSvc.hasPermission('group:view')
+          // visible: this.permsSvc.hasPermission('group:view')
         },
         
 
@@ -164,13 +164,13 @@ export class Sidebar implements OnInit {
       label: 'Gestión de Usuarios',
       icon: 'pi pi-users',
       command: () => this.router.navigate(['/groups-admin']),
-      visible: this.permsSvc.hasPermission('group:edit') // solo admins
+      // visible: this.permsSvc.hasPermission('group:edit') // solo admins
     },
     {
       label: 'Gestión de Grupo',
       icon: 'pi pi-id-card',
       command: () => this.router.navigate(['/groups-gestion']),
-      visible: this.permsSvc.hasPermission('group:edit') // solo admins
+      // visible: this.permsSvc.hasPermission('group:edit') // solo admins
     },
     {
       label: 'Cerrar sesión',
