@@ -3,18 +3,11 @@
 <div class="flex min-h-screen items-center justify-center bg-slate-100 p-6 py-12">
   <div class="w-full max-w-4xl rounded-2xl bg-white p-8 shadow-2xl border border-gray-100">
 
-    
-    <!-- <div class="flex justify-content-center mb-6">
-      <img src="https://i.pravatar.cc/100"
-           class="rounded-full border shadow-md">
-    </div> -->
-
-    <h1 class="text-3xl font-bold text-black text-center mb-8">
-      Perfil de Usuarios
-    </h1>
+    <h1 class="text-3xl font-bold text-black text-center mb-8">Mi Perfil</h1>
 
     <!-- FORMULARIO -->
-    <form [formGroup]="userForm" (ngSubmit)="onSave()" class="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4">
+    <form [formGroup]="userForm" (ngSubmit)="onSave()"
+          class="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4">
 
       <div class="flex flex-col gap-1">
         <label class="text-sm font-bold text-gray-700">Usuario</label>
@@ -45,21 +38,19 @@
       </div>
 
       <div class="flex flex-col gap-1">
-        <label class="text-sm font-bold text-gray-700">Fecha de Nacimiento</label>
-        <input formControlName="fechaNacimiento" type="date"
-          [ngClass]="{'border-red-500': f['fechaNacimiento'].touched && f['fechaNacimiento'].invalid}"
+        <label class="text-sm font-bold text-gray-700">Dirección</label>
+        <input formControlName="direccion" type="text"
+          [ngClass]="{'border-red-500': f['direccion'].touched && f['direccion'].invalid}"
           class="p-3 border rounded-lg outline-none focus:ring-2 focus:ring-blue-200 text-black bg-white disabled:bg-gray-50">
       </div>
 
       <div class="flex flex-col gap-1 relative">
-        <label class="text-sm font-bold text-gray-700">Contraseña</label>
-
+        <label class="text-sm font-bold text-gray-700">Nueva Contraseña</label>
         <div class="relative">
           <input [type]="showPassword ? 'text' : 'password'" formControlName="password"
-            class="p-3 border rounded-lg outline-none focus:ring-2 focus:ring-blue-200 text-black bg-white disabled:bg-gray-50 w-full pr-12">
-
-          <button type="button"
-                  (click)="togglePassword()"
+            class="p-3 border rounded-lg outline-none focus:ring-2 focus:ring-blue-200 text-black bg-white disabled:bg-gray-50 w-full pr-12"
+            placeholder="Dejar vacío para no cambiar">
+          <button type="button" (click)="togglePassword()"
                   class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500">
             <i [class]="showPassword ? 'pi pi-eye' : 'pi pi-eye-slash'"></i>
           </button>
@@ -69,82 +60,89 @@
       <div class="flex flex-col gap-1">
         <label class="text-sm font-bold text-gray-700">Confirmar Contraseña</label>
         <input [type]="showPassword ? 'text' : 'password'" formControlName="confirmPassword"
-          class="p-3 border rounded-lg outline-none focus:ring-2 focus:ring-blue-200 text-black bg-white disabled:bg-gray-50">
+          [ngClass]="{'border-red-500': userForm.errors?.['notMatching'] && f['confirmPassword'].touched}"
+          class="p-3 border rounded-lg outline-none focus:ring-2 focus:ring-blue-200 text-black bg-white disabled:bg-gray-50"
+          placeholder="Repite la contraseña">
+        <small *ngIf="userForm.errors?.['notMatching'] && f['confirmPassword'].touched"
+               class="text-red-600 text-xs">Las contraseñas no coinciden.</small>
       </div>
 
-      <div class="md:col-span-2 mt-8 flex gap-4 justify-center">
+      <div class="md:col-span-2 mt-4 flex gap-4 justify-center">
         <p-button *ngIf="!editMode"
                   label="Editar Perfil"
                   icon="pi pi-pencil"
-                  styleClass="p-button-outlined p-button-secondary"
-                  (onClick)="enableEdit()">
-        </p-button>
+                  severity="secondary"
+                  (onClick)="enableEdit()"/>
+
+        <p-button *ngIf="editMode"
+                  label="Cancelar"
+                  icon="pi pi-times"
+                  severity="secondary"
+                  type="button"
+                  (onClick)="editMode = false; userForm.disable()"/>
 
         <p-button *ngIf="editMode"
                   label="Guardar Cambios"
                   icon="pi pi-check"
                   severity="success"
                   type="submit"
-                  [disabled]="userForm.invalid">
-        </p-button>
+                  [loading]="guardando()"
+                  [disabled]="userForm.invalid"/>
       </div>
 
     </form>
 
     <!-- RESUMEN DE TICKETS -->
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-10">
+    <!-- RESUMEN DE TICKETS -->
+<div class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-10">
+  <p-card header="Pendientes">
+    <h2 class="text-2xl font-bold text-yellow-600 text-center">{{ pendientes() }}</h2>
+  </p-card>
+  <p-card header="En Progreso">
+    <h2 class="text-2xl font-bold text-blue-600 text-center">{{ enProgreso() }}</h2>
+  </p-card>
+  <p-card header="Hechos">
+    <h2 class="text-2xl font-bold text-green-600 text-center">{{ hechos() }}</h2>
+  </p-card>
+</div>
 
-      <p-card header="Abiertos">
-        <h2 class="text-2xl font-bold text-blue-600 text-center">
-          {{ abiertos }}
-        </h2>
-      </p-card>
-
-      <p-card header="En Progreso">
-        <h2 class="text-2xl font-bold text-yellow-600 text-center">
-          {{ enProgreso }}
-        </h2>
-      </p-card>
-
-      <p-card header="Hechos">
-        <h2 class="text-2xl font-bold text-green-600 text-center">
-          {{ hechos }}
-        </h2>
-      </p-card>
-
-    </div>
 
     <!-- TABLA DE TICKETS -->
     <div class="mt-8">
-
-      <p-card header="Tickets Asignados">
-
-        <p-table [value]="tickets" responsiveLayout="scroll">
-
+      <p-card header="Mis Tickets">
+       <p-table [value]="tickets()" responsiveLayout="scroll">
           <ng-template pTemplate="header">
             <tr>
               <th>ID</th>
               <th>Título</th>
               <th>Estado</th>
               <th>Prioridad</th>
-              <th>Fecha Límite</th>
             </tr>
           </ng-template>
-
           <ng-template pTemplate="body" let-ticket>
             <tr>
-              <td>{{ticket.id}}</td>
-              <td>{{ticket.titulo}}</td>
-              <td>{{ticket.estado}}</td>
-              <td>{{ticket.prioridad}}</td>
-              <td>{{ticket.fechaLimite}}</td>
+              <td>{{ ticket.id }}</td>
+              <td>{{ ticket.titulo }}</td>
+              <td>
+                <p-tag [value]="getEstadoLabel(ticket.estado)"
+                       [severity]="getEstadoSeverity(ticket.estado)"/>
+              </td>
+              <td>
+                <p-tag [value]="ticket.prioridad"
+                       [severity]="getPrioridadSeverity(ticket.prioridad)"/>
+              </td>
             </tr>
           </ng-template>
-
+          <ng-template pTemplate="emptymessage">
+            <tr>
+              <td colspan="4" class="text-center py-6 text-gray-400">
+                <i class="pi pi-inbox text-3xl block mb-2"></i>
+                No tienes tickets asignados
+              </td>
+            </tr>
+          </ng-template>
         </p-table>
-
       </p-card>
-
     </div>
 
   </div>

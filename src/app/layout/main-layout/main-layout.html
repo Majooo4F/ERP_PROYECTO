@@ -1,14 +1,12 @@
-
-<p-toolbar class="shadow-2 custom-toolbar">
-  <div class="p-toolbar-group-start">
+<p-toolbar styleClass="shadow-md px-4">
+  <ng-template pTemplate="start">
     <p-button
-      icon="pi pi-bars text-blue-600"
+      icon="pi pi-bars"
       (click)="visible = true"
-      [text]="true">
-    </p-button>
-
-    <span class="title">Mi Sistema</span>
-  </div>
+      [text]="true"
+      severity="secondary"/>
+    <span class="ml-3 font-bold text-lg">Mi Sistema</span>
+  </ng-template>
 </p-toolbar>
 
 <p-drawer
@@ -19,8 +17,8 @@
   [dismissible]="true"
   [showCloseIcon]="true">
   <app-sidebar></app-sidebar>
-
 </p-drawer>
+
 <div class="content">
   <router-outlet></router-outlet>
 </div>

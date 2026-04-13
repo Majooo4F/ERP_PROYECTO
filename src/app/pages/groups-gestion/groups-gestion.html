@@ -1,101 +1,125 @@
-<div class="card">
-<!-- HEADER -->
-<div class="flex justify-between items-center mb-4">
-  <div>
-    <span class="text-gray-500 text-sm">Configuración del Espacio</span>
-    <h2 class="text-xl font-bold text-gray-800">{{ groupName }}</h2>
-  </div>
+<p-toast></p-toast>
 
-  <p-button
-    label="Añadir por Email"
-    icon="pi pi-user-plus"
-    severity="info"
-    class="text-white"
-    (click)="openNew()">
-  </p-button>
-</div>
+<div class="min-h-screen p-6 bg-gray-50">
+  <div style="max-width: 1100px; margin: auto;">
 
-<!-- CONFIGURACIÓN DEL GRUPO -->
-<div class="flex items-center gap-3 mb-4">
-  <label class="font-semibold text-gray-700">Nombre del Grupo</label>
-  <input 
-    pInputText 
-    [(ngModel)]="groupName" 
-    class="w-64 border border-gray-300 rounded px-2 py-1 text-gray-800" 
-    placeholder="Ingresa nombre del grupo" 
-  />
-  <p-button 
-    label="Guardar" 
-    icon="pi pi-save" 
-    severity="success" 
-    class="text-white"
-    (click)="saveGroup()">
-  </p-button>
-</div>
-
-  <!-- BUSCAR MIEMBRO -->
-  <div class="flex justify-end mb-3">
-    <span class="p-input-icon-left">
-      <i class="pi pi-search"></i>
-      <input pInputText type="text" placeholder="Buscar miembro..." class="w-64"
-        (input)="dt.filterGlobal($event.target.value, 'contains')" />
-    </span>
-  </div>
-
-  <!-- TABLA DE USUARIOS -->
-  <p-table #dt [value]="users" [paginator]="true" [rows]="5"
-    [globalFilterFields]="['name','email','role']" responsiveLayout="scroll"
-    [tableStyle]="{ 'min-width': '60rem' }">
-
-    <ng-template pTemplate="header">
-      <tr>
-        <th pSortableColumn="name">Nombre <p-sortIcon field="name"></p-sortIcon></th>
-        <th pSortableColumn="email">Email <p-sortIcon field="email"></p-sortIcon></th>
-        <th>Rol</th>
-        <th>Fecha Ingreso</th>
-        <th style="width:150px">Acciones</th>
-      </tr>
-    </ng-template>
-
-    <ng-template pTemplate="body" let-user let-i="rowIndex">
-      <tr>
-        <td class="font-semibold">{{ user.name }}</td>
-        <td>{{ user.email }}</td>
-        <td>
-          <span class="px-3 py-1 border-round text-xs text-white"
-            [ngClass]="user.role === 'Admin' ? 'bg-red-500' : 'bg-blue-500'">
-            {{ user.role }}
-          </span>
-        </td>
-        <td>{{ user.date }}</td>
-        <td>
-          <div class="flex gap-2">
-            <p-button icon="pi pi-trash" severity="danger" [rounded]="true" [outlined]="true"
-              (click)="deleteUser(i)">
-            </p-button>
-          </div>
-        </td>
-      </tr>
-    </ng-template>
-
-  </p-table>
-
-  <!-- DIALOGO PARA AÑADIR USUARIO -->
-  <p-dialog header="Añadir usuario" [modal]="true" [(visible)]="visible" [style]="{ width: '25rem' }"
-    [draggable]="false" [resizable]="false">
-
-    <span class="block mb-4 text-surface-500">Añadir usuario al grupo por email</span>
-
-    <div class="flex items-center gap-4 mb-4">
-      <label class="font-semibold w-24">Email</label>
-      <input pInputText [(ngModel)]="user.email" class="flex-auto" autocomplete="off">
+    <!-- HEADER -->
+    <div class="mb-6">
+      <h1 class="text-3xl font-bold text-black">Gestión de Grupo</h1>
+      <p class="text-gray-600 mt-1">{{ grupoActual?.nombre || 'Sin grupo' }}</p>
     </div>
 
-    <div class="flex justify-end gap-2">
-      <p-button label="Cancelar" severity="secondary" (click)="visible=false"></p-button>
-      <p-button label="Añadir" severity="success" (click)="saveUser()"></p-button>
+    <!-- EDITAR GRUPO -->
+    <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-6">
+      <h3 class="font-bold text-black text-lg mb-4">Editar información del grupo</h3>
+      <div class="flex flex-col gap-3">
+        <div class="flex items-center gap-3">
+          <label class="text-sm font-bold text-black w-28">Nombre</label>
+          <input pInputText [(ngModel)]="groupName"
+                 class="flex-1" placeholder="Nombre del grupo"/>
+        </div>
+        <div class="flex items-center gap-3">
+          <label class="text-sm font-bold text-black w-28">Descripción</label>
+          <input pInputText [(ngModel)]="groupDescripcion"
+                 class="flex-1" placeholder="Descripción del grupo"/>
+        </div>
+        <div class="flex justify-end">
+          <p-button label="Guardar Cambios" icon="pi pi-save"
+                    severity="success" [loading]="guardando()"
+                    (click)="saveGroup()"/>
+        </div>
+      </div>
     </div>
+
+    <!-- MIEMBROS -->
+    <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+
+      <!-- HEADER TABLA -->
+      <div class="flex justify-between items-center mb-4">
+        <h3 class="font-bold text-black text-lg">Miembros del Grupo</h3>
+        <div class="flex gap-3 items-center">
+          <input pInputText type="text" placeholder="Buscar miembro..."
+                 class="w-64" (input)="onFilter($event)"/>
+          <p-button label="Añadir Miembro" icon="pi pi-user-plus"
+                    severity="info" (click)="openNew()"/>
+        </div>
+      </div>
+
+      <!-- LOADING -->
+      <div *ngIf="loading()" class="flex justify-center py-10">
+        <i class="pi pi-spin pi-spinner text-3xl text-blue-500"></i>
+      </div>
+
+      <!-- TABLA NATIVA -->
+      <table *ngIf="!loading()" style="width:100%; border-collapse:collapse;">
+        <thead>
+          <tr style="background:#f1f5f9; border-bottom: 2px solid #e2e8f0;">
+            <th style="padding:12px 16px; text-align:left; color:#000000; font-weight:900; font-size:14px; letter-spacing:0.05em;">NOMBRE</th>
+            <th style="padding:12px 16px; text-align:left; color:#000000; font-weight:900; font-size:14px; letter-spacing:0.05em;">EMAIL</th>
+            <th style="padding:12px 16px; text-align:left; color:#000000; font-weight:900; font-size:14px; letter-spacing:0.05em;">FECHA INGRESO</th>
+            <th style="padding:12px 16px; text-align:left; color:#000000; font-weight:900; font-size:14px; letter-spacing:0.05em;">ACCIONES</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let miembro of miembros()"
+              style="border-bottom:1px solid #e2e8f0;"
+              onmouseover="this.style.background='#f8fafc'"
+              onmouseout="this.style.background='#ffffff'">
+            <td style="padding:12px 16px; color:#000000; font-weight:700; font-size:14px;">
+              {{ miembro.nombre }}
+            </td>
+            <td style="padding:12px 16px; color:#374151; font-size:14px;">
+              {{ miembro.email }}
+            </td>
+            <td style="padding:12px 16px; color:#374151; font-size:14px;">
+              {{ miembro.fecha }}
+            </td>
+            <td style="padding:12px 16px;">
+              <p-button icon="pi pi-trash" severity="danger"
+                        [rounded]="true" [outlined]="true"
+                        (click)="deleteUser(miembro.usuario_id)"/>
+            </td>
+          </tr>
+          <tr *ngIf="miembros().length === 0">
+            <td colspan="4" style="padding:40px; text-align:center; color:#9ca3af;">
+              <i class="pi pi-users" style="font-size:2.5rem; display:block; margin-bottom:8px;"></i>
+              No hay miembros en este grupo
+            </td>
+          </tr>
+        </tbody>
+      </table>
+
+    </div>
+
+  </div>
+
+  <!-- DIALOG AGREGAR -->
+  <p-dialog header="Añadir Miembro" [modal]="true" [(visible)]="visible"
+            [style]="{ width: '28rem' }" [draggable]="false">
+
+    <div class="flex flex-col gap-4 pt-2">
+      <div class="flex flex-col gap-1">
+        <label class="font-bold text-sm text-black">Selecciona usuario por email</label>
+        <p-select
+          [options]="emailOptions()"
+          [(ngModel)]="emailSeleccionado"
+          optionLabel="label"
+          optionValue="value"
+          placeholder="Selecciona un email..."
+          [filter]="true"
+          filterPlaceholder="Buscar email..."
+          appendTo="body"
+          class="w-full"/>
+      </div>
+    </div>
+
+    <ng-template pTemplate="footer">
+      <div class="flex justify-end gap-2">
+        <p-button label="Cancelar" severity="secondary" (click)="visible = false"/>
+        <p-button label="Añadir" icon="pi pi-check" severity="success"
+                  [loading]="guardando()" (click)="saveUser()"/>
+      </div>
+    </ng-template>
 
   </p-dialog>
-
 </div>

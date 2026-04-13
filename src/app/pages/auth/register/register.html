@@ -4,7 +4,7 @@
   <div class="w-full max-w-2xl rounded-2xl bg-white p-8 shadow-2xl border border-gray-100">
     <h1 class="text-3xl font-bold text-black text-center mb-8">Crear Cuenta</h1>
 
-    <form [formGroup]="registerForm" (ngSubmit)="onRegister()" 
+    <form [formGroup]="registerForm" (ngSubmit)="onRegister()"
           class="grid grid-cols-1 md:grid-cols-2 gap-4">
 
       <!-- Usuario -->
@@ -14,6 +14,8 @@
           class="p-3 border rounded-lg outline-none focus:ring-2 focus:ring-blue-200 text-black"
           [class.border-red-500]="registerForm.get('usuario')?.invalid && registerForm.get('usuario')?.touched"
           placeholder="Usuario123">
+        <small *ngIf="registerForm.get('usuario')?.invalid && registerForm.get('usuario')?.touched"
+          class="text-red-600 text-xs">El usuario es obligatorio.</small>
       </div>
 
       <!-- Nombre -->
@@ -23,49 +25,42 @@
           class="p-3 border rounded-lg outline-none focus:ring-2 focus:ring-blue-200 text-black"
           [class.border-red-500]="registerForm.get('nombreCompleto')?.invalid && registerForm.get('nombreCompleto')?.touched"
           placeholder="Juan Pérez">
+        <small *ngIf="registerForm.get('nombreCompleto')?.invalid && registerForm.get('nombreCompleto')?.touched"
+          class="text-red-600 text-xs">El nombre es obligatorio.</small>
       </div>
 
       <!-- Email -->
       <div class="flex flex-col gap-1 md:col-span-2">
-  <label class="text-sm font-bold text-gray-700">Email</label>
-  <input formControlName="email" type="email"
-    class="p-3 border rounded-lg outline-none focus:ring-2 focus:ring-blue-200 text-black"
-    [class.border-red-500]="registerForm.get('email')?.invalid && registerForm.get('email')?.touched"
-    placeholder="correo@ejemplo.com">
-
-  <small *ngIf="registerForm.get('email')?.invalid 
-                && registerForm.get('email')?.touched"
-         class="text-red-600 text-xs">
-    Ingresa un correo válido (ejemplo: usuario@gmail.com)
-  </small>
-</div>
+        <label class="text-sm font-bold text-gray-700">Email</label>
+        <input formControlName="email" type="email"
+          class="p-3 border rounded-lg outline-none focus:ring-2 focus:ring-blue-200 text-black"
+          [class.border-red-500]="registerForm.get('email')?.invalid && registerForm.get('email')?.touched"
+          placeholder="correo@ejemplo.com">
+        <small *ngIf="registerForm.get('email')?.invalid && registerForm.get('email')?.touched"
+          class="text-red-600 text-xs">Ingresa un correo válido (ejemplo: usuario@gmail.com)</small>
+      </div>
 
       <!-- Teléfono -->
       <div class="flex flex-col gap-1">
         <label class="text-sm font-bold text-gray-700">Teléfono (10 dígitos)</label>
-        <input formControlName="telefono"
-          type="text"
-          maxlength="10"
-          inputmode="numeric"
-          onkeypress="return /[0-9]/.test(event.key)"
+        <input formControlName="telefono" type="text" maxlength="10"
+          inputmode="numeric" onkeypress="return /[0-9]/.test(event.key)"
           class="p-3 border rounded-lg outline-none focus:ring-2 focus:ring-blue-200 text-black"
           [class.border-red-500]="registerForm.get('telefono')?.invalid && registerForm.get('telefono')?.touched"
           placeholder="5512345678">
+        <small *ngIf="registerForm.get('telefono')?.invalid && registerForm.get('telefono')?.touched"
+          class="text-red-600 text-xs">Debe tener exactamente 10 dígitos.</small>
       </div>
 
       <!-- Fecha -->
-     <div class="flex flex-col gap-1">
-  <label class="text-sm font-bold text-gray-700">Fecha de Nacimiento</label>
-  <input formControlName="fechaNacimiento" type="date"
-    class="p-3 border rounded-lg outline-none focus:ring-2 focus:ring-blue-200 text-black"
-    [class.border-red-500]="registerForm.get('fechaNacimiento')?.invalid && registerForm.get('fechaNacimiento')?.touched">
-
-  <small *ngIf="registerForm.get('fechaNacimiento')?.errors?.['menorDeEdad'] 
-                && registerForm.get('fechaNacimiento')?.touched"
-         class="text-red-600 text-xs">
-    Debes ser mayor de 18 años.
-  </small>
-</div>
+      <div class="flex flex-col gap-1">
+        <label class="text-sm font-bold text-gray-700">Fecha de Nacimiento</label>
+        <input formControlName="fechaNacimiento" type="date"
+          class="p-3 border rounded-lg outline-none focus:ring-2 focus:ring-blue-200 text-black"
+          [class.border-red-500]="registerForm.get('fechaNacimiento')?.invalid && registerForm.get('fechaNacimiento')?.touched">
+        <small *ngIf="registerForm.get('fechaNacimiento')?.errors?.['menorDeEdad'] && registerForm.get('fechaNacimiento')?.touched"
+          class="text-red-600 text-xs">Debes ser mayor de 18 años.</small>
+      </div>
 
       <!-- Dirección -->
       <div class="flex flex-col gap-1 md:col-span-2">
@@ -74,6 +69,8 @@
           class="p-3 border rounded-lg outline-none focus:ring-2 focus:ring-blue-200 text-black"
           [class.border-red-500]="registerForm.get('direccion')?.invalid && registerForm.get('direccion')?.touched"
           placeholder="Calle Falsa 123">
+        <small *ngIf="registerForm.get('direccion')?.invalid && registerForm.get('direccion')?.touched"
+          class="text-red-600 text-xs">La dirección es obligatoria.</small>
       </div>
 
       <!-- Contraseña -->
@@ -85,22 +82,13 @@
             class="w-full p-3 border rounded-lg outline-none focus:ring-2 focus:ring-blue-200 text-black pr-10"
             [class.border-red-500]="registerForm.get('password')?.invalid && registerForm.get('password')?.touched"
             placeholder="Mín. 8 caracteres">
-
-          <button type="button"
-            (click)="togglePassword()"
+          <button type="button" (click)="togglePassword()"
             class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-emerald-600 focus:outline-none">
-
-            <!-- 👁 Abierto cuando se ve -->
-            <i [class]="showPassword ? 'pi pi-eye' : 'pi pi-eye-slash'" 
-               class="text-lg"></i>
-
+            <i [class]="showPassword ? 'pi pi-eye' : 'pi pi-eye-slash'" class="text-lg"></i>
           </button>
         </div>
-
         <small *ngIf="registerForm.get('password')?.invalid && registerForm.get('password')?.touched"
-          class="text-red-600 text-xs">
-          Requiere: 1 Mayúscula, 1 Número y 1 Símbolo.
-        </small>
+          class="text-red-600 text-xs">Requiere: 1 Mayúscula, 1 Número y 1 Símbolo.</small>
       </div>
 
       <!-- Confirmar Contraseña -->
@@ -111,21 +99,27 @@
           class="w-full p-3 border rounded-lg outline-none focus:ring-2 focus:ring-blue-200 text-black"
           [class.border-red-500]="registerForm.errors?.['notMatching'] && registerForm.get('confirmPassword')?.touched"
           placeholder="Repite tu contraseña">
-
         <small *ngIf="registerForm.errors?.['notMatching'] && registerForm.get('confirmPassword')?.touched"
-          class="text-red-600 text-xs">
-          Las contraseñas no coinciden.
-        </small>
+          class="text-red-600 text-xs">Las contraseñas no coinciden.</small>
       </div>
 
       <!-- Botón -->
       <div class="md:col-span-2 mt-4">
-        <p-button 
-          type="submit"
-          label="Finalizar Registro"
-          [disabled]="registerForm.invalid"
-          styleClass="w-full bg-emerald-600 border-none font-bold py-3 shadow-md">
-        </p-button>
+        <button type="submit"
+          [disabled]="registerForm.invalid || loading"
+          class="w-full rounded-lg bg-emerald-600 py-3.5 font-bold text-white shadow-lg hover:bg-emerald-700 active:scale-[0.98] transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2">
+          <i *ngIf="loading" class="pi pi-spin pi-spinner"></i>
+          {{ loading ? 'Registrando...' : 'Finalizar Registro' }}
+        </button>
+      </div>
+
+      <!-- Link login -->
+      <div class="md:col-span-2 text-center mt-2">
+        <span class="text-gray-600 text-sm">¿Ya tienes cuenta?</span>
+        <a routerLink="/login"
+          class="ml-2 text-blue-600 font-semibold hover:underline cursor-pointer transition-colors">
+          Inicia sesión aquí
+        </a>
       </div>
 
     </form>

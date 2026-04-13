@@ -1,254 +1,220 @@
-// import { Component } from '@angular/core';
-// import { CommonModule } from '@angular/common';
-// import { FormsModule } from '@angular/forms';
-
-// import { CardModule } from 'primeng/card';
-// import { ButtonModule } from 'primeng/button';
-// import { TableModule } from 'primeng/table';
-// import { DialogModule } from 'primeng/dialog';
-// import { InputTextModule } from 'primeng/inputtext';
-// import { TextareaModule } from 'primeng/textarea';
-// import { ConfirmDialogModule } from 'primeng/confirmdialog';
-// import { ConfirmationService } from 'primeng/api';
-
-// interface Grupo {
-//   nivel: string;
-//   autor: string;
-//   nombre: string;
-//   integrantes: number;
-//   tickets: number;
-//   descripcion: string;
-// }
-
-// @Component({
-//   selector: 'app-groups',
-//   standalone: true,
-//   imports: [
-//     CommonModule,
-//     FormsModule,
-//     CardModule,
-//     ButtonModule,
-//     TableModule,
-//     DialogModule,
-//     InputTextModule,
-//     TextareaModule,
-//     ConfirmDialogModule
-//   ],
-//   providers: [ConfirmationService],
-//   templateUrl: './groups.html'
-// })
-// export class Groups {
-
-//   registros: Grupo[] = [
-//     {
-//       nivel: 'Básico',
-//       autor: 'Juan Pérez',
-//       nombre: 'Grupo Angular',
-//       integrantes: 10,
-//       tickets: 25,
-//       descripcion: 'Grupo de introducción a Angular'
-//     }
-//   ];
-
-//   visible: boolean = false;
-//   isEdit: boolean = false;
-//   editIndex: number | null = null;
-
-//   form: Grupo = this.resetForm();
-
-//   constructor(private confirmationService: ConfirmationService) {}
-
-//   get totalUsuarios(): number {
-//     return this.registros.length;
-//   }
-
-//   resetForm(): Grupo {
-//     return {
-//       nivel: '',
-//       autor: '',
-//       nombre: '',
-//       integrantes: 0,
-//       tickets: 0,
-//       descripcion: ''
-//     };
-//   }
-
-//   openNew(): void {
-//     this.isEdit = false;
-//     this.editIndex = null;
-//     this.form = this.resetForm();
-//     this.visible = true;
-//   }
-
-//   edit(item: Grupo, index: number): void {
-//     this.isEdit = true;
-//     this.editIndex = index;
-//     this.form = { ...item };
-//     this.visible = true;
-//   }
-
-//   save(): void {
-//     if (this.isEdit && this.editIndex !== null) {
-//       this.registros[this.editIndex] = { ...this.form };
-//     } else {
-//       this.registros.push({ ...this.form });
-//     }
-
-//     this.visible = false;
-//     this.form = this.resetForm();
-//   }
-
-//   confirmDelete(index: number): void {
-//     this.confirmationService.confirm({
-//       message: '¿Seguro que deseas eliminar este grupo?',
-//       header: 'Confirmar eliminación',
-//       icon: 'pi pi-exclamation-triangle',
-//       accept: () => {
-//         this.registros.splice(index, 1);
-//       }
-//     });
-//   }
-// }
-import { Component } from '@angular/core';
+import { Component, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-
 import { CardModule } from 'primeng/card';
 import { ButtonModule } from 'primeng/button';
 import { TableModule } from 'primeng/table';
 import { DialogModule } from 'primeng/dialog';
 import { InputTextModule } from 'primeng/inputtext';
-import { TextareaModule } from 'primeng/textarea';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
-import { AvatarModule } from 'primeng/avatar'; // Añadido para el diseño de lista
-import { ConfirmationService } from 'primeng/api';
-
+import { AvatarModule } from 'primeng/avatar';
+import { ToastModule } from 'primeng/toast';
+import { ConfirmationService, MessageService } from 'primeng/api';
 import { HasPermissionDirective } from '../../directives/has-permission.directive';
-
-interface UsuarioGrupo {
-  nombre: string;
-  email: string;
-}
-
-interface Grupo {
-  nivel: string;
-  autor: string;
-  nombre: string;
-  integrantes: number;
-  tickets: number;
-  descripcion: string;
-  usuarios: UsuarioGrupo[]; // Cambiado de string[] a objeto
-}
+import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { PermissionService } from '../../services/permission.service';
 
 @Component({
   selector: 'app-groups',
   standalone: true,
   imports: [
-    CommonModule,
-    FormsModule,
-    CardModule,
-    ButtonModule,
-    TableModule,
-    DialogModule,
-    InputTextModule,
-    TextareaModule,
-    ConfirmDialogModule,
-    AvatarModule,
+    CommonModule, FormsModule, CardModule, ButtonModule,
+    TableModule, DialogModule, InputTextModule,
+    ConfirmDialogModule, AvatarModule, ToastModule,
     HasPermissionDirective
   ],
-  providers: [ConfirmationService],
+  providers: [ConfirmationService, MessageService],
   templateUrl: './groups.html'
 })
-export class Groups {
+export class Groups implements OnInit {
 
-  registros: Grupo[] = [
-    {
-      nivel: 'Básico',
-      autor: 'Juan Pérez',
-      nombre: 'Grupo Angular',
-      integrantes: 2,
-      tickets: 25,
-      descripcion: 'Grupo de introducción a Angular',
-      usuarios: [
-        { nombre: 'Juan Pérez', email: 'juan@gmail.com' },
-        { nombre: 'Ana García', email: 'ana@gmail.com' }
-      ]
-    }
-  ];
+  private apiUrl = 'http://localhost:3000';
 
-  visible: boolean = false;
-  isEdit: boolean = false;
-  editIndex: number | null = null;
-  nuevoEmail: string = '';
+  registros = signal<any[]>([]);
+  loading = signal(false);
+  guardando = signal(false);
 
-  form: Grupo = this.resetForm();
+  visible = false;
+  isEdit = false;
+  editId: number | null = null;
+  nuevoEmail = '';
 
-  constructor(private confirmationService: ConfirmationService) {}
+  usuariosDisponibles: any[] = [];
+  form = this.resetForm();
 
-  resetForm(): Grupo {
-    return {
-      nivel: '',
-      autor: '',
-      nombre: '',
-      integrantes: 0,
-      tickets: 0,
-      descripcion: '',
-      usuarios: []
-    };
+  constructor(
+    private confirmationService: ConfirmationService,
+    private messageService: MessageService,
+    private http: HttpClient,
+    public permsSvc: PermissionService  // ← agregar
+  ) {}
+
+  ngOnInit() {
+    this.cargarMisGrupos();
   }
 
-  openNew(): void {
+  private getHeaders(): HttpHeaders {
+    const token = localStorage.getItem('token');
+    return new HttpHeaders({ Authorization: `Bearer ${token}` });
+  }
+
+  cargarGrupos() {
+    this.loading.set(true);
+    this.http.get<any>(`${this.apiUrl}/groups`, { headers: this.getHeaders() })
+      .subscribe({
+        next: (res) => {
+          this.registros.set(res.data || []);
+          this.loading.set(false);
+        },
+        error: () => {
+          this.loading.set(false);
+          this.messageService.add({
+            severity: 'error', summary: 'Error', detail: 'No se pudieron cargar los grupos'
+          });
+        }
+      });
+  }
+
+  cargarMisGrupos() {
+    this.loading.set(true);
+    const usuario = JSON.parse(localStorage.getItem('usuario') || '{}');
+    if (!usuario?.id) {
+      this.loading.set(false);
+      return;
+    }
+    this.http.get<any>(
+      `${this.apiUrl}/groups/miembros/usuario/${usuario.id}`,
+      { headers: this.getHeaders() }
+    ).subscribe({
+      next: (res) => {
+        this.registros.set(res.data || []);
+        this.loading.set(false);
+      },
+      error: () => {
+        this.loading.set(false);
+        this.messageService.add({
+          severity: 'error', summary: 'Error', detail: 'No se pudieron cargar tus grupos'
+        });
+      }
+    });
+  }
+
+  cargarUsuarios() {
+    this.http.get<any>(`${this.apiUrl}/users/`, { headers: this.getHeaders() })
+      .subscribe({
+        next: (res) => { this.usuariosDisponibles = res.data || []; }
+      });
+  }
+
+  resetForm() {
+    return { nombre: '', descripcion: '', usuarios: [] as any[] };
+  }
+
+  openNew() {
     this.isEdit = false;
-    this.editIndex = null;
+    this.editId = null;
     this.form = this.resetForm();
+    this.nuevoEmail = '';
+    this.cargarUsuarios();
     this.visible = true;
   }
 
-  edit(item: Grupo, index: number): void {
+  edit(grupo: any) {
     this.isEdit = true;
-    this.editIndex = index;
-    // Deep copy para evitar editar la tabla directamente
-    this.form = JSON.parse(JSON.stringify(item));
+    this.editId = grupo.id;
+    this.form = { nombre: grupo.nombre, descripcion: grupo.descripcion, usuarios: [] };
+    this.nuevoEmail = '';
+    this.cargarUsuarios();
     this.visible = true;
   }
 
   agregarUsuario() {
     if (!this.nuevoEmail || !this.nuevoEmail.includes('@')) return;
-
-    // Lógica temporal: Extraer nombre del email para que no aparezca vacío
-    const nombreExtraido = this.nuevoEmail.split('@')[0];
-    const capitalizado = nombreExtraido.charAt(0).toUpperCase() + nombreExtraido.slice(1);
-
-    this.form.usuarios.push({
-      nombre: capitalizado,
-      email: this.nuevoEmail
-    });
-
-    this.form.integrantes = this.form.usuarios.length;
+    const usuario = this.usuariosDisponibles.find(u => u.email === this.nuevoEmail);
+    if (!usuario) {
+      this.messageService.add({ severity: 'warn', summary: 'No encontrado', detail: 'No existe un usuario con ese email' });
+      return;
+    }
+    const yaAgregado = this.form.usuarios.find((u: any) => u.email === this.nuevoEmail);
+    if (yaAgregado) {
+      this.messageService.add({ severity: 'warn', summary: 'Duplicado', detail: 'El usuario ya está en la lista' });
+      return;
+    }
+    this.form.usuarios.push({ id: usuario.id, nombre: usuario.nombre_completo, email: usuario.email });
     this.nuevoEmail = '';
   }
 
   eliminarUsuario(index: number) {
     this.form.usuarios.splice(index, 1);
-    this.form.integrantes = this.form.usuarios.length;
   }
 
-  save(): void {
-    if (this.isEdit && this.editIndex !== null) {
-      this.registros[this.editIndex] = { ...this.form };
-    } else {
-      this.registros.push({ ...this.form });
+  save() {
+    if (!this.form.nombre.trim()) {
+      this.messageService.add({ severity: 'warn', summary: 'Campo requerido', detail: 'El nombre es obligatorio' });
+      return;
     }
-    this.visible = false;
+    this.guardando.set(true);
+
+    if (this.isEdit && this.editId) {
+      this.http.put<any>(
+        `${this.apiUrl}/groups/${this.editId}`,
+        { nombre: this.form.nombre, descripcion: this.form.descripcion },
+        { headers: this.getHeaders() }
+      ).subscribe({
+        next: () => {
+          this.guardando.set(false);
+          this.visible = false;
+          this.messageService.add({ severity: 'success', summary: 'Actualizado', detail: 'Grupo actualizado' });
+          this.cargarMisGrupos();
+        },
+        error: (err) => {
+          this.guardando.set(false);
+          this.messageService.add({ severity: 'error', summary: 'Error', detail: err?.error?.data?.message || 'Error al actualizar' });
+        }
+      });
+    } else {
+      this.http.post<any>(
+        `${this.apiUrl}/groups`,
+        { nombre: this.form.nombre, descripcion: this.form.descripcion },
+        { headers: this.getHeaders() }
+      ).subscribe({
+        next: (res) => {
+          const grupoId = res.data?.grupo?.id;
+          if (grupoId && this.form.usuarios.length > 0) {
+            const requests = this.form.usuarios.map((u: any) =>
+              this.http.post<any>(`${this.apiUrl}/groups/miembros`, { grupo_id: grupoId, usuario_id: u.id }, { headers: this.getHeaders() }).toPromise()
+            );
+            Promise.all(requests).catch(() => {});
+          }
+          this.guardando.set(false);
+          this.visible = false;
+          this.messageService.add({ severity: 'success', summary: 'Creado', detail: 'Grupo creado correctamente' });
+          this.cargarMisGrupos();
+        },
+        error: (err) => {
+          this.guardando.set(false);
+          this.messageService.add({ severity: 'error', summary: 'Error', detail: err?.error?.data?.message || 'Error al crear grupo' });
+        }
+      });
+    }
   }
 
-  confirmDelete(index: number): void {
+  confirmDelete(grupo: any) {
     this.confirmationService.confirm({
-      message: '¿Seguro que deseas eliminar este grupo?',
+      message: `¿Seguro que deseas eliminar "${grupo.nombre}"?`,
       header: 'Confirmar eliminación',
       icon: 'pi pi-exclamation-triangle',
       accept: () => {
-        this.registros.splice(index, 1);
+        this.http.delete<any>(`${this.apiUrl}/groups/${grupo.id}`, { headers: this.getHeaders() })
+          .subscribe({
+            next: () => {
+              this.messageService.add({ severity: 'success', summary: 'Eliminado', detail: 'Grupo eliminado' });
+              this.cargarMisGrupos();
+            },
+            error: (err) => {
+              this.messageService.add({ severity: 'error', summary: 'Error', detail: err?.error?.data?.message || 'Error al eliminar' });
+            }
+          });
       }
     });
   }

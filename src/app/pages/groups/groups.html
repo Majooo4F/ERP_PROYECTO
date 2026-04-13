@@ -1,377 +1,155 @@
-<!-- <div class="min-h-screen p-6 surface-ground">
+<p-toast></p-toast>
+<p-confirmDialog/>
 
+<div class="min-h-screen p-6 bg-gray-50">
   <div style="max-width: 1100px; margin: auto;">
-    <div class="flex justify-content-between gap-4 mb-5">
 
-      <div style="width: 48%;">
-        <p-card styleClass="shadow-3 border-round-xl text-center">
-          <div class="py-4">
-            <div class="text-xl font-semibold mb-2">Total Usuarios</div>
-            <span class="text-4xl font-bold text-blue-500">
-              {{ registros.length }}
-            </span>
-          </div>
-        </p-card>
+    <!-- HEADER -->
+    <div class="mb-6">
+      <h1 class="text-3xl font-bold text-black">Mis Grupos</h1>
+      <p class="text-gray-600 mt-1">Selecciona un grupo para gestionar sus tickets</p>
+    </div>
+
+    <!-- STATS — solo admin -->
+    <div *ngIf="permsSvc.hasPermission('group:manage')"
+         class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+
+      <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 text-center">
+        <div class="text-base font-bold text-black mb-2">Total Grupos</div>
+        <span class="text-4xl font-bold text-blue-600">{{ registros().length }}</span>
       </div>
 
-      <div style="width: 48%;">
-        <p-card styleClass="shadow-3 border-round-xl text-center">
-          <div class="py-4">
-            <div class="text-xl font-semibold mb-2">Advance</div>
-            <span class="text-4xl font-bold text-gray-600">Card</span>
-          </div>
-        </p-card>
+      <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 text-center">
+        <div class="text-base font-bold text-black mb-2">Administración</div>
+        <span class="text-4xl font-bold text-black">Grupos</span>
       </div>
 
     </div>
 
-    <div class="card">
+    <!-- TABLA -->
+    <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-4">
 
-      <p-confirmDialog></p-confirmDialog>
-
-      <div class="flex justify-content-end mb-3">
-        <p-button
-          label="Agregar"
-          icon="pi pi-plus"
-          severity="success"
-          (click)="openNew()">
-        </p-button>
+      <div *ngIf="loading()" class="flex justify-center py-10">
+        <i class="pi pi-spin pi-spinner text-3xl text-blue-500"></i>
       </div>
 
-      <p-table [value]="registros" responsiveLayout="scroll">
-        <ng-template pTemplate="header">
-          <tr>
-            <th>Nivel</th>
-            <th>Autor</th>
-            <th>Nombre</th>
-            <th>Integrantes</th>
-            <th>Tickets</th>
-            <th>Descripción</th>
-            <th>Acciones</th>
-          </tr>
-        </ng-template>
+      <div *ngIf="!loading()">
 
-        <ng-template pTemplate="body" let-grupo let-i="rowIndex">
-          <tr>
-            <td>{{ grupo.nivel }}</td>
-            <td>{{ grupo.autor }}</td>
-            <td>{{ grupo.nombre }}</td>
-            <td>{{ grupo.integrantes }}</td>
-            <td>{{ grupo.tickets }}</td>
-            <td style="max-width: 250px; white-space: normal; word-break: break-word;">
-              {{ grupo.descripcion }}
-            </td>
-            <td>
-              <div class="flex gap-2">
-                <p-button
-                  icon="pi pi-pencil"
-                  severity="info"
-                  [rounded]="true"
-                  [text]="true"
-                  (click)="edit(grupo, i)">
-                </p-button>
+        <div class="flex justify-between items-center mb-4">
+          <h2 class="text-xl font-bold text-black">Lista de Grupos</h2>
+          <p-button *ifHasPermission="'group:add'"
+            label="Nuevo Grupo" icon="pi pi-plus"
+            severity="success" (click)="openNew()"/>
+        </div>
 
-                <p-button
-                  icon="pi pi-trash"
-                  severity="danger"
-                  [rounded]="true"
-                  [text]="true"
-                  (click)="confirmDelete(i)">
-                </p-button>
-              </div>
-            </td>
-          </tr>
-        </ng-template>
-      </p-table>
+        <table style="width:100%; border-collapse:collapse;">
+          <thead>
+            <tr style="background:#f1f5f9; border-bottom: 2px solid #e2e8f0;">
+              <th style="padding:12px 16px; text-align:left; color:#000000; font-weight:900; font-size:14px; letter-spacing:0.05em;">NOMBRE</th>
+              <th style="padding:12px 16px; text-align:left; color:#000000; font-weight:900; font-size:14px; letter-spacing:0.05em;">DESCRIPCIÓN</th>
+              <th style="padding:12px 16px; text-align:left; color:#000000; font-weight:900; font-size:14px; letter-spacing:0.05em;">ACCIONES</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let grupo of registros()"
+                style="border-bottom:1px solid #e2e8f0; transition: background 0.2s;"
+                onmouseover="this.style.background='#f8fafc'"
+                onmouseout="this.style.background='#ffffff'">
+              <td style="padding:12px 16px; color:#000000; font-weight:700; font-size:14px;">
+                {{ grupo.nombre }}
+              </td>
+              <td style="padding:12px 16px; color:#374151; font-size:14px;">
+                {{ grupo.descripcion || '—' }}
+              </td>
+              <td style="padding:12px 16px;">
+                <div class="flex gap-2">
+                  <p-button *ifHasPermission="'group:edit'"
+                    icon="pi pi-pencil" severity="info"
+                    [rounded]="true" [text]="true"
+                    (click)="edit(grupo)"/>
+                  <p-button *ifHasPermission="'group:delete'"
+                    icon="pi pi-trash" severity="danger"
+                    [rounded]="true" [text]="true"
+                    (click)="confirmDelete(grupo)"/>
+                </div>
+              </td>
+            </tr>
+            <tr *ngIf="registros().length === 0">
+              <td colspan="3" style="padding:40px; text-align:center; color:#9ca3af;">
+                <i class="pi pi-inbox" style="font-size:2.5rem; display:block; margin-bottom:8px;"></i>
+                No hay grupos disponibles
+              </td>
+            </tr>
+          </tbody>
+        </table>
 
+      </div>
     </div>
+
   </div>
 
+  <!-- DIALOG -->
   <p-dialog
-  [header]="isEdit ? 'Editar Grupo' : 'Nuevo Grupo'"
-  [(visible)]="visible"
-  [modal]="true"
-  [draggable]="false"
-  [resizable]="false"
-  [closable]="true"
-  [dismissableMask]="true"
-  [style]="{ width: '25rem' }">
+    [header]="isEdit ? 'Editar Grupo' : 'Nuevo Grupo'"
+    [(visible)]="visible" [modal]="true"
+    [style]="{ width: '42rem' }">
 
-  <span class="p-text-secondary block mb-4">
-    {{ isEdit ? 'Actualiza la información del grupo.' : 'Completa la información.' }}
-  </span>
+    <div class="flex flex-col gap-4 pt-2">
 
-  <div class="flex items-center gap-4 mb-3">
-    <label class="font-semibold w-6rem">Nivel</label>
-    <input pInputText class="flex-auto" [(ngModel)]="form.nivel" />
-  </div>
-
-  <div class="flex items-center gap-4 mb-3">
-    <label class="font-semibold w-6rem">Autor</label>
-    <input pInputText class="flex-auto" [(ngModel)]="form.autor" />
-  </div>
-
-  <div class="flex items-center gap-4 mb-3">
-    <label class="font-semibold w-6rem">Nombre</label>
-    <input pInputText class="flex-auto" [(ngModel)]="form.nombre" />
-  </div>
-
-  <div class="flex items-center gap-4 mb-3">
-    <label class="font-semibold w-6rem">Integrantes</label>
-    <input pInputText type="number" class="flex-auto" [(ngModel)]="form.integrantes" />
-  </div>
-
-  <div class="flex items-center gap-4 mb-3">
-    <label class="font-semibold w-6rem">Tickets</label>
-    <input pInputText type="number" class="flex-auto" [(ngModel)]="form.tickets" />
-  </div>
-
-  <div class="flex flex-column gap-2 mb-3">
-    <label class="font-semibold">Descripción</label>
-    <textarea pInputTextarea rows="3" [(ngModel)]="form.descripcion"></textarea>
-  </div>
-
-  <div class="flex justify-end gap-2">
-    <p-button label="Cancel" severity="secondary" (click)="visible = false"></p-button>
-    <p-button label="Save" (click)="save()"></p-button>
-  </div>
-
-</p-dialog>
-
-</div> -->
-<div *ifHasPermission="'group:view'" class="min-h-screen p-6 surface-ground">
-
-  <div style="max-width: 1100px; margin: auto;">
-    
-    <div class="flex justify-content-between gap-4 mb-5">
-      <div style="width: 48%;">
-        <p-card styleClass="shadow-3 border-round-xl text-center">
-          <div class="py-4">
-            <div class="text-xl font-semibold mb-2">Total Grupos</div>
-            <span class="text-4xl font-bold text-blue-500">
-              {{ registros.length }}
-            </span>
-          </div>
-        </p-card>
+      <div class="flex flex-col gap-1">
+        <label class="font-bold text-sm text-black">Nombre del Grupo *</label>
+        <input pInputText [(ngModel)]="form.nombre" class="w-full" placeholder="Nombre del grupo"/>
       </div>
 
-      <div style="width: 48%;">
-        <p-card styleClass="shadow-3 border-round-xl text-center">
-          <div class="py-4">
-            <div class="text-xl font-semibold mb-2">Administración</div>
-            <span class="text-4xl font-bold text-gray-600">Grupos</span>
-          </div>
-        </p-card>
-      </div>
-    </div>
-
-    <div class="card">
-      <p-confirmDialog></p-confirmDialog>
-
-      <div class="flex justify-content-end mb-3">
-        <p-button
-          *ifHasPermission="'group:add'"
-          label="Agregar"
-          icon="pi pi-plus"
-          severity="success"
-          (click)="openNew()">
-        </p-button>
+      <div class="flex flex-col gap-1">
+        <label class="font-bold text-sm text-black">Descripción</label>
+        <textarea rows="3" [(ngModel)]="form.descripcion"
+          class="w-full p-3 border rounded-lg outline-none focus:ring-2 focus:ring-blue-200 resize-none text-black"
+          placeholder="Describe el objetivo del grupo">
+        </textarea>
       </div>
 
-      <p-table [value]="registros" responsiveLayout="scroll">
-        <ng-template pTemplate="header">
-          <tr>
-            <th>Nivel</th>
-            <th>Autor</th>
-            <th>Nombre</th>
-            <th>Integrantes</th>
-            <th>Tickets</th>
-            <th>Descripción</th>
-            <th>Acciones</th>
-          </tr>
-        </ng-template>
+      <div *ngIf="!isEdit" class="flex flex-col gap-2">
+        <label class="font-bold text-sm text-black">Agregar usuario por email</label>
+        <div class="flex gap-2">
+          <input pInputText [(ngModel)]="nuevoEmail" class="flex-1"
+                 placeholder="correo@ejemplo.com"
+                 (keyup.enter)="agregarUsuario()"/>
+          <p-button icon="pi pi-plus" severity="success" (click)="agregarUsuario()"/>
+        </div>
 
-        <ng-template pTemplate="body" let-grupo let-i="rowIndex">
-          <tr>
-            <td>{{ grupo.nivel }}</td>
-            <td>{{ grupo.autor }}</td>
-            <td>{{ grupo.nombre }}</td>
-            <td>{{ grupo.integrantes }}</td>
-            <td>{{ grupo.tickets }}</td>
-            <td style="max-width:250px; white-space:normal; word-break:break-word;">
-              {{ grupo.descripcion }}
-            </td>
-            <td>
-              <div class="flex gap-2">
-                <p-button
-                  *ifHasPermission="'group:edit'"
-                  icon="pi pi-pencil"
-                  severity="info"
-                  [rounded]="true"
-                  [text]="true"
-                  (click)="edit(grupo,i)">
-                </p-button>
-                <p-button
-                  *ifHasPermission="'group:delete'"
-                  icon="pi pi-trash"
-                  severity="danger"
-                  [rounded]="true"
-                  [text]="true"
-                  (click)="confirmDelete(i)">
-                </p-button>
+        <div class="border rounded-lg p-2 max-h-48 overflow-y-auto bg-gray-50">
+          <div *ngFor="let user of form.usuarios; let i = index"
+               class="flex items-center justify-between p-2 rounded mb-1 bg-white border">
+            <div class="flex items-center gap-3">
+              <p-avatar [label]="user.nombre.charAt(0).toUpperCase()"
+                        shape="circle" styleClass="bg-blue-500 text-white font-bold"/>
+              <div class="flex flex-col">
+                <span class="font-bold text-sm text-black">{{ user.nombre }}</span>
+                <small class="text-gray-500">{{ user.email }}</small>
               </div>
-            </td>
-          </tr>
-        </ng-template>
-      </p-table>
-    </div>
-  </div>
-
-<p-dialog
-  *ifHasPermission="['group:add','group:edit']"
-  [header]="isEdit ? 'Editar Grupo' : 'Nuevo Grupo'"
-  [(visible)]="visible"
-  [modal]="true"
-  [style]="{ width: '42rem' }"
-  [breakpoints]="{ '960px': '75vw', '641px': '90vw' }">
-
-  <div class="p-fluid grid">
-
-    <!-- NIVEL -->
-    <div class="field col-12 md:col-6">
-      <label class="font-semibold mb-2 block">Nivel</label>
-      <input
-        pInputText
-        [(ngModel)]="form.nivel"
-        placeholder="Ej. Nivel 1" />
-    </div>
-
-    <!-- AUTOR -->
-    <div class="field col-12 md:col-6">
-      <label class="font-semibold mb-2 block">Autor</label>
-      <input
-        pInputText
-        [(ngModel)]="form.autor"
-        placeholder="Nombre del autor" />
-    </div>
-
-    <!-- NOMBRE GRUPO -->
-    <div class="field col-12">
-      <label class="font-semibold mb-2 block">Nombre del Grupo</label>
-      <input
-        pInputText
-        [(ngModel)]="form.nombre"
-        placeholder="Nombre del grupo" />
-    </div>
-
-    <!-- DESCRIPCIÓN -->
-    <div class="field col-12">
-      <label class="font-semibold mb-2 block">Descripción</label>
-      <textarea
-        pInputTextarea
-        rows="3"
-        [(ngModel)]="form.descripcion"
-        placeholder="Describe el objetivo del grupo">
-      </textarea>
-    </div>
-
-    <!-- AGREGAR USUARIO -->
-    <div class="field col-12">
-      <label class="font-semibold text-primary block mb-2">
-        Agregar usuario por email
-      </label>
-
-      <div class="flex gap-2">
-
-        <div class="p-inputgroup flex-1">
-          <span class="p-inputgroup-addon">
-            <i class="pi pi-envelope"></i>
-          </span>
-
-          <input
-            pInputText
-            placeholder="correo@ejemplo.com"
-            [(ngModel)]="nuevoEmail"
-            (keyup.enter)="agregarUsuario()" />
-        </div>
-
-        <p-button
-          icon="pi pi-plus"
-          severity="success"
-          (click)="agregarUsuario()">
-        </p-button>
-
-      </div>
-    </div>
-
-    <!-- LISTA DE USUARIOS -->
-    <div class="field col-12">
-  <label class="font-semibold block mb-2">
-    Usuarios del Grupo ({{form.usuarios?.length || 0}})
-  </label>
-
-  <div class="surface-card border-1 surface-border border-round p-2" 
-       style="max-height:200px; overflow-y:auto;">
-    
-    <div *ngFor="let user of form.usuarios; let i=index" 
-         class="flex align-items-center justify-content-between p-2 border-round mb-2 surface-ground hover:surface-100 transition-duration-150">
-      
-      <div class="flex align-items-center gap-3">
-        <p-avatar 
-          [label]="user.nombre.charAt(0).toUpperCase()" 
-          shape="circle" 
-          styleClass="bg-blue-500 text-white font-bold"
-          size="large">
-        </p-avatar>
-
-        <div class="flex flex-column">
-          <span class="font-bold text-900">{{user.nombre}}</span>
-          <small class="text-600">{{user.email}}</small>
+            </div>
+            <p-button icon="pi pi-trash" severity="danger"
+                      [text]="true" [rounded]="true"
+                      (click)="eliminarUsuario(i)"/>
+          </div>
+          <div *ngIf="!form.usuarios.length"
+               class="text-center py-4 text-gray-400 text-sm italic">
+            <i class="pi pi-users block mb-1"></i>
+            No hay usuarios agregados
+          </div>
         </div>
       </div>
 
-      <p-button 
-        icon="pi pi-trash" 
-        severity="danger" 
-        [text]="true" 
-        [rounded]="true"
-        (click)="eliminarUsuario(i)"
-        pTooltip="Quitar usuario"
-        tooltipPosition="left">
-      </p-button>
-
     </div>
 
-    <div *ngIf="!form.usuarios?.length" class="text-center p-4 text-500 italic">
-      <i class="pi pi-users mb-2" style="font-size: 2rem"></i>
-      <p>No hay usuarios asignados a este grupo.</p>
-    </div>
+    <ng-template pTemplate="footer">
+      <div class="flex justify-end gap-2">
+        <p-button label="Cancelar" severity="secondary" [text]="true" (click)="visible = false"/>
+        <p-button label="Guardar" icon="pi pi-check"
+                  [loading]="guardando()" (click)="save()"/>
+      </div>
+    </ng-template>
 
-  </div>
-</div>
-
-  </div>
-
-  <!-- BOTONES -->
-  <ng-template pTemplate="footer">
-    <div class="flex justify-content-end gap-2 pt-2">
-
-      <p-button
-        label="Cancelar"
-        severity="secondary"
-        [text]="true"
-        (click)="visible=false">
-      </p-button>
-
-      <p-button
-        label="Guardar"
-        icon="pi pi-check"
-        (click)="save()">
-      </p-button>
-
-    </div>
-  </ng-template>
-
-</p-dialog>
-
+  </p-dialog>
 </div>

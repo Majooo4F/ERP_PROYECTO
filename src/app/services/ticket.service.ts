@@ -1,39 +1,47 @@
-import { Injectable } from '@angular/core';
-import { Ticket } from '../models/ticket.model';
+import { Injectable, inject, PLATFORM_ID } from '@angular/core';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { Observable } from 'rxjs';
+import { isPlatformBrowser } from '@angular/common';
 
-@Injectable({
-  providedIn: 'root'
-})
+@Injectable({ providedIn: 'root' })
 export class TicketService {
 
-  private tickets: Ticket[] = [
-    {
-      id: 1,
-      titulo: 'Error en pasarela de pagos',
-      descripcion: 'Los pagos con tarjeta fallan en producción.',
-      estado: 'Pendiente',
-      asignado: 'Juan Pérez',
-      prioridad: '高',
-      fechaCreacion: '2026-03-10',
-      fechaLimite: '2026-03-20',
-      comentarios: [],
-      historial: ['Ticket creado']
-    },
-    {
-      id: 2,
-      titulo: 'Actualizar UI del dashboard',
-      descripcion: 'Aplicar nuevo diseño al panel principal.',
-      estado: 'En progreso',
-      asignado: 'Maria Lopez',
-      prioridad: '中',
-      fechaCreacion: '2026-03-09',
-      fechaLimite: '2026-03-18',
-      comentarios: [],
-      historial: ['Ticket creado']
-    }
-  ];
+  private apiUrl = 'http://localhost:3000/tickets';
+  private platformId = inject(PLATFORM_ID);
+  private isBrowser = isPlatformBrowser(this.platformId);
 
-  getTickets(): Ticket[] {
-    return this.tickets;
+  constructor(private http: HttpClient) {}
+
+  private getHeaders(): HttpHeaders {
+    const token = this.isBrowser ? localStorage.getItem('token') : '';
+    return new HttpHeaders({ Authorization: `Bearer ${token}` });
+  }
+
+  getTickets(): Observable<any> {
+    return this.http.get(this.apiUrl, { headers: this.getHeaders() });
+  }
+
+  getTicketById(id: number): Observable<any> {
+    return this.http.get(`${this.apiUrl}/${id}`, { headers: this.getHeaders() });
+  }
+
+  createTicket(ticket: any): Observable<any> {
+    return this.http.post(this.apiUrl, ticket, { headers: this.getHeaders() });
+  }
+
+  updateTicket(id: number, ticket: any): Observable<any> {
+    return this.http.put(`${this.apiUrl}/${id}`, ticket, { headers: this.getHeaders() });
+  }
+
+  updateEstado(id: number, estado: string): Observable<any> {
+    return this.http.patch(`${this.apiUrl}/${id}/state`, { estado }, { headers: this.getHeaders() });
+  }
+
+  asignarTicket(id: number, asignado_id: number): Observable<any> {
+    return this.http.patch(`${this.apiUrl}/${id}/move`, { asignado_id }, { headers: this.getHeaders() });
+  }
+
+  deleteTicket(id: number): Observable<any> {
+    return this.http.delete(`${this.apiUrl}/${id}`, { headers: this.getHeaders() });
   }
 }

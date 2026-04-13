@@ -95,7 +95,6 @@
 //   }
 
 // } 
-
 import { Component, inject, PLATFORM_ID } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
@@ -116,6 +115,7 @@ import { Auth } from '../../../services/auth';
 export class Login {
 
   loginForm: FormGroup;
+  loading = false;
 
   private platformId = inject(PLATFORM_ID);
   private isBrowser = isPlatformBrowser(this.platformId);
@@ -127,55 +127,45 @@ export class Login {
     private permissionSvc: PermissionService,
     private auth: Auth
   ) {
-
     this.loginForm = this.fb.group({
       email: ['', [Validators.required, Validators.email]],
       password: ['', [Validators.required]]
     });
-
   }
 
   onSubmit() {
+    if (this.loginForm.invalid) return;
 
-    if (this.loginForm.valid) {
+    this.loading = true;
+    const { email, password } = this.loginForm.value;
 
-      const { email, password } = this.loginForm.value;
+    this.auth.login(email, password).subscribe({
+      next: (res) => {
+        this.loading = false;
+        const data = res.data; // ← tu API devuelve { statusCode, intOpCode, data }
 
-      this.auth.login(email, password).subscribe({
+        // guardar token
+        if (data?.token) this.auth.setToken(data.token);
 
-        next: (response) => {
+        // guardar permisos
+        if (data?.permisos) this.permissionSvc.setPermissions(data.permisos);
 
-  console.log('API response:', response);
-
-  // 🔥 VALIDAR permisos antes de guardar
-  if (response.permissions) {
-    this.permissionSvc.setPermissions(response.permissions);
-  }
-
-  if (this.isBrowser) {
-    localStorage.setItem('usuario', response.email);
-  }
-
-  // 🔥 VALIDAR token
-  if (response.token) {
-    this.auth.setToken(response.token);
-  }
-
-  this.router.navigate(['/home']);
-},
-
-        error: () => {
-          this.messageService.add({
-            severity: 'error',
-            summary: 'Error',
-            detail: 'Correo o contraseña incorrectos'
-          });
+        // guardar usuario
+        if (this.isBrowser && data?.user) {
+          localStorage.setItem('usuario', JSON.stringify(data.user));
+          localStorage.setItem('grupos', JSON.stringify(data.grupos || []));
         }
 
-      });
-
-    }
-
+        this.router.navigate(['/home']);
+      },
+      error: (err) => {
+        this.loading = false;
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Error',
+          detail: err?.error?.data?.message || 'Correo o contraseña incorrectos'
+        });
+      }
+    });
   }
-
 }

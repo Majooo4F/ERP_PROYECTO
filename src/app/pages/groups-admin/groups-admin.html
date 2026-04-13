@@ -1,184 +1,233 @@
-<!-- <div class="card">
-<div class="flex justify-between items-center mb-4">
-<div>
-<h2 class="text-xl font-bold text-black">Gestión Global de Usuarios</h2>
-<span class="text-sm text-black">Panel de Control para SuperAdmin</span>
-</div>
-<p-button label="Nuevo Usuario" icon="pi pi-user-plus" severity="info" (click)="openNew()"></p-button>
-</div>
+<p-toast></p-toast>
 
-<div class="flex justify-end mb-3">
-<span class="p-input-icon-left">
-<i class="pi pi-search"></i>
-<input pInputText type="text" placeholder="Buscar usuario..." class="w-64" (input)="dt.filterGlobal($event.target.value, 'contains')" />
-</span>
-</div>
+<div class="min-h-screen p-6 bg-gray-50">
+  <div style="max-width: 1200px; margin: auto;">
 
-<p-table #dt [value]="users" [paginator]="true" [rows]="5" [globalFilterFields]="['name','email','role']" responsiveLayout="scroll" [tableStyle]="{ 'min-width': '60rem' }">
-<ng-template pTemplate="header">
-<tr>
-<th pSortableColumn="name">Nombre <p-sortIcon field="name"></p-sortIcon></th>
-<th pSortableColumn="email">Email <p-sortIcon field="email"></p-sortIcon></th>
-<th>Permisos Asignados (Roles)</th>
-<th style="width:150px">Acciones</th>
-</tr>
-</ng-template>
-
-<ng-template pTemplate="body" let-user let-i="rowIndex">
-<tr>
-<td class="font-semibold">{{ user.name }}</td>
-<td>{{ user.email }}</td>
-<td>
-<div class="flex gap-2 flex-wrap">
-<span *ngFor="let role of user.role.split(',').map(r => r.trim())" class="px-3 py-1 border-round text-s text-white bg-blue-500">{{ role }}</span>
-</div>
-</td>
-<td>
-<div class="flex gap-2">
-<p-button icon="pi pi-pencil" severity="info" [rounded]="true" [outlined]="true" (click)="editUser(user,i)"></p-button>
-<p-button icon="pi pi-trash" severity="danger" [rounded]="true" [outlined]="true" (click)="deleteUser(i)"></p-button>
-</div>
-</td>
-</tr>
-</ng-template>
-</p-table>
-
-<p-dialog header="Usuario" [modal]="true" [(visible)]="visible" [style]="{ width: '25rem' }" [draggable]="false" [resizable]="false">
-<span class="block mb-4 text-surface-500">Información del usuario</span>
-
-<div class="flex items-center gap-4 mb-4">
-<label class="font-semibold w-24">Nombre</label>
-<input pInputText [(ngModel)]="user.name" class="flex-auto" autocomplete="off">
-</div>
-
-<div class="flex items-center gap-4 mb-4">
-<label class="font-semibold w-24">Email</label>
-<input pInputText [(ngModel)]="user.email" class="flex-auto" autocomplete="off">
-</div>
-
-<div class="flex items-center gap-4 mb-6">
-<label class="font-semibold w-24">Permiso</label>
-<input pInputText [(ngModel)]="user.role" class="flex-auto" placeholder="admin:all, groups:view">
-</div>
-
-<div class="flex justify-end gap-2">
-<p-button label="Cancelar" severity="secondary" (click)="visible=false"></p-button>
-<p-button label="Guardar" severity="success" (click)="saveUser()"></p-button>
-</div>
-
-</p-dialog>
-</div> -->
-<div class="card">
-  <div class="flex justify-between items-center mb-4">
-    <div>
-      <h2 class="text-xl font-bold text-black">Gestión Global de Usuarios</h2>
-      <span class="text-sm text-black">Panel de Control para SuperAdmin</span>
+    <!-- HEADER -->
+    <div class="mb-6 flex justify-between items-center">
+      <div>
+        <h1 class="text-3xl font-bold text-black">Gestión de Usuarios</h1>
+        <p class="text-gray-600 mt-1">Administra usuarios y sus permisos</p>
+      </div>
+      <p-button label="Nuevo Usuario" icon="pi pi-user-plus"
+                severity="success" (click)="openNew()"/>
     </div>
-    <p-button label="Nuevo Usuario" icon="pi pi-user-plus" severity="info" (click)="openNew()"></p-button>
+
+    <!-- TABLA -->
+    <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+
+      <!-- BUSCAR -->
+      <div class="flex justify-between items-center mb-4">
+        <h2 class="text-xl font-bold text-black">Lista de Usuarios</h2>
+        <input pInputText type="text" placeholder="Buscar usuario..."
+               class="w-72" (input)="onFilter($event)"/>
+      </div>
+
+      <!-- LOADING -->
+      <div *ngIf="loading()" class="flex justify-center py-10">
+        <i class="pi pi-spin pi-spinner text-3xl text-blue-500"></i>
+      </div>
+
+      <!-- TABLA NATIVA -->
+      <table *ngIf="!loading()" style="width:100%; border-collapse:collapse;">
+        <thead>
+          <tr style="background:#f1f5f9; border-bottom: 2px solid #e2e8f0;">
+            <th style="padding:12px 16px; text-align:left; color:#000000; font-weight:900; font-size:14px; letter-spacing:0.05em;">NOMBRE</th>
+            <th style="padding:12px 16px; text-align:left; color:#000000; font-weight:900; font-size:14px; letter-spacing:0.05em;">EMAIL</th>
+            <th style="padding:12px 16px; text-align:left; color:#000000; font-weight:900; font-size:14px; letter-spacing:0.05em;">PERMISOS</th>
+            <th style="padding:12px 16px; text-align:left; color:#000000; font-weight:900; font-size:14px; letter-spacing:0.05em;">ACCIONES</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let u of users()"
+              style="border-bottom:1px solid #e2e8f0;"
+              onmouseover="this.style.background='#f8fafc'"
+              onmouseout="this.style.background='#ffffff'">
+            <td style="padding:12px 16px; color:#000000; font-weight:700; font-size:14px;">
+              {{ u.name }}
+            </td>
+            <td style="padding:12px 16px; color:#374151; font-size:14px;">
+              {{ u.email }}
+            </td>
+            <td style="padding:12px 16px;">
+              <div style="display:flex; flex-wrap:wrap; gap:4px;">
+                <span *ngFor="let perm of u.permissions"
+                  style="padding:2px 8px; border-radius:9999px; font-size:11px; font-weight:600; color:#fff; background:#3b82f6;">
+                  {{ perm }}
+                </span>
+                <span *ngIf="!u.permissions?.length"
+                  style="color:#9ca3af; font-size:12px; font-style:italic;">
+                  Sin permisos
+                </span>
+              </div>
+            </td>
+            <td style="padding:12px 16px;">
+              <div class="flex gap-2">
+                <p-button icon="pi pi-pencil" severity="info"
+                          [rounded]="true" [outlined]="true"
+                          (click)="openEdit(u)"/>
+                <p-button icon="pi pi-trash" severity="danger"
+                          [rounded]="true" [outlined]="true"
+                          (click)="deleteUser(u)"/>
+              </div>
+            </td>
+          </tr>
+          <tr *ngIf="users().length === 0">
+            <td colspan="4" style="padding:40px; text-align:center; color:#9ca3af;">
+              <i class="pi pi-users" style="font-size:2.5rem; display:block; margin-bottom:8px;"></i>
+              No hay usuarios
+            </td>
+          </tr>
+        </tbody>
+      </table>
+
+    </div>
+
   </div>
 
-  <div class="flex justify-end mb-3">
-    <span class="p-input-icon-left">
-      <i class="pi pi-search"></i>
-      <input pInputText type="text" placeholder="Buscar usuario..." class="w-64"
-        (input)="dt.filterGlobal($event.target.value, 'contains')" />
-    </span>
-  </div>
+  <!-- DIALOG -->
+  <p-dialog [header]="isEdit ? 'Editar Usuario' : 'Nuevo Usuario'"
+            [modal]="true" [(visible)]="visible"
+            [style]="{ width: isEdit ? '32rem' : '40rem' }"
+            [draggable]="false" [resizable]="false">
 
-  <p-table #dt [value]="users" [paginator]="true" [rows]="5"
-  [globalFilterFields]="['name','email','permissionsText']"
-    responsiveLayout="scroll"
-    [tableStyle]="{ 'min-width': '60rem' }">
+    <!-- NUEVO USUARIO -->
+    <form *ngIf="!isEdit" [formGroup]="newUserForm" class="flex flex-col gap-4 pt-2">
 
-    <ng-template pTemplate="header">
-      <tr>
-        <th pSortableColumn="name">Nombre <p-sortIcon field="name"></p-sortIcon></th>
-        <th pSortableColumn="email">Email <p-sortIcon field="email"></p-sortIcon></th>
-        <th>Permisos</th>
-        <th style="width:150px">Acciones</th>
-      </tr>
-    </ng-template>
+      <div class="flex flex-col gap-1">
+        <label class="font-bold text-sm text-black">Usuario <span class="text-red-500">*</span></label>
+        <input pInputText formControlName="usuario" class="w-full" placeholder="Nombre de usuario"/>
+        <small class="text-red-500" *ngIf="isInvalid('usuario')">El usuario es obligatorio.</small>
+      </div>
 
-    <ng-template pTemplate="body" let-user let-i="rowIndex">
-      <tr>
-        <td class="font-semibold">{{ user.name }}</td>
-        <td>{{ user.email }}</td>
+      <div class="flex flex-col gap-1">
+        <label class="font-bold text-sm text-black">Nombre completo <span class="text-red-500">*</span></label>
+        <input pInputText formControlName="nombreCompleto" class="w-full" placeholder="Nombre completo"/>
+        <small class="text-red-500" *ngIf="isInvalid('nombreCompleto')">El nombre es obligatorio.</small>
+      </div>
 
-        <!-- 🔥 PERMISOS -->
-        <td>
-          <div class="flex gap-2 flex-wrap">
-            <span *ngFor="let perm of user.permissions"
-              class="px-3 py-1 border-round text-sm text-white bg-blue-500">
-              {{ perm ? perm.replace(/:/g,' - ') : '' }}
-            </span>
+      <div class="flex flex-col gap-1">
+        <label class="font-bold text-sm text-black">Email <span class="text-red-500">*</span></label>
+        <input pInputText formControlName="email" class="w-full" placeholder="correo@ejemplo.com"/>
+        <small class="text-red-500" *ngIf="isInvalid('email')">Ingresa un email válido.</small>
+      </div>
+
+      <div class="grid grid-cols-2 gap-4">
+        <div class="flex flex-col gap-1">
+          <label class="font-bold text-sm text-black">Dirección <span class="text-red-500">*</span></label>
+          <input pInputText formControlName="direccion" class="w-full" placeholder="Dirección"/>
+          <small class="text-red-500" *ngIf="isInvalid('direccion')">La dirección es obligatoria.</small>
+        </div>
+        <div class="flex flex-col gap-1">
+          <label class="font-bold text-sm text-black">Teléfono <span class="text-red-500">*</span></label>
+          <input pInputText formControlName="telefono" class="w-full" placeholder="10 dígitos"/>
+          <small class="text-red-500" *ngIf="isInvalid('telefono')">Ingresa 10 dígitos.</small>
+        </div>
+      </div>
+
+      <div class="flex flex-col gap-1">
+        <label class="font-bold text-sm text-black">Fecha de nacimiento <span class="text-red-500">*</span></label>
+        <input pInputText type="date" formControlName="fechaNacimiento" class="w-full"/>
+        <small class="text-red-500"
+               *ngIf="isInvalid('fechaNacimiento') && newUserForm.get('fechaNacimiento')?.errors?.['menorDeEdad']">
+          Debe ser mayor de 18 años.
+        </small>
+      </div>
+
+      <div class="grid grid-cols-2 gap-4">
+        <div class="flex flex-col gap-1">
+          <label class="font-bold text-sm text-black">Contraseña <span class="text-red-500">*</span></label>
+          <div class="relative">
+            <input pInputText [type]="showPassword ? 'text' : 'password'"
+                   formControlName="password" class="w-full pr-10" placeholder="Contraseña"/>
+            <button type="button" class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500"
+                    (click)="togglePassword()">
+              <i [class]="showPassword ? 'pi pi-eye-slash' : 'pi pi-eye'"></i>
+            </button>
           </div>
-        </td>
+          <small class="text-red-500" *ngIf="isInvalid('password')">
+            Mín. 8 caracteres, mayúscula, número y símbolo.
+          </small>
+        </div>
+        <div class="flex flex-col gap-1">
+          <label class="font-bold text-sm text-black">Confirmar contraseña <span class="text-red-500">*</span></label>
+          <input pInputText [type]="showPassword ? 'text' : 'password'"
+                 formControlName="confirmPassword" class="w-full" placeholder="Repite la contraseña"/>
+          <small class="text-red-500"
+                 *ngIf="newUserForm.get('confirmPassword')?.touched && newUserForm.errors?.['notMatching']">
+            Las contraseñas no coinciden.
+          </small>
+        </div>
+      </div>
 
-        <td>
+      <div class="flex flex-col gap-2">
+        <div class="flex justify-between items-center">
+          <label class="font-bold text-sm text-black">Permisos</label>
           <div class="flex gap-2">
-            <p-button icon="pi pi-pencil" severity="info" [rounded]="true" [outlined]="true"
-              (click)="editUser(user,i)">
-            </p-button>
-
-            <p-button icon="pi pi-trash" severity="danger" [rounded]="true" [outlined]="true"
-              (click)="deleteUser(i)">
-            </p-button>
+            <p-button label="Todos" severity="info" [text]="true" (click)="selectAll()"/>
+            <p-button label="Limpiar" severity="secondary" [text]="true" (click)="clearAll()"/>
           </div>
-        </td>
-      </tr>
+        </div>
+        <p-multiSelect
+          [options]="permissionsList"
+          formControlName="permissions"
+          optionLabel="label"
+          optionValue="value"
+          display="chip"
+          [filter]="true"
+          [maxSelectedLabels]="5"
+          selectedItemsLabel="{0} permisos"
+          appendTo="body"
+          placeholder="Selecciona permisos"
+          class="w-full"/>
+      </div>
+
+    </form>
+
+    <!-- EDITAR USUARIO -->
+    <div *ngIf="isEdit" class="flex flex-col gap-4 pt-2">
+
+      <div class="flex flex-col gap-1">
+        <label class="font-bold text-sm text-black">Nombre completo</label>
+        <input pInputText [(ngModel)]="editUser_model.name" class="w-full"/>
+      </div>
+
+      <div class="flex flex-col gap-1">
+        <label class="font-bold text-sm text-black">Email</label>
+        <input pInputText [(ngModel)]="editUser_model.email" class="w-full" [disabled]="true"/>
+      </div>
+
+      <div class="flex flex-col gap-2">
+        <div class="flex justify-between items-center">
+          <label class="font-bold text-sm text-black">Permisos</label>
+          <div class="flex gap-2">
+            <p-button label="Todos" severity="info" [text]="true" (click)="selectAll()"/>
+            <p-button label="Limpiar" severity="secondary" [text]="true" (click)="clearAll()"/>
+          </div>
+        </div>
+        <p-multiSelect
+          [options]="permissionsList"
+          [(ngModel)]="editUser_model.permissions"
+          optionLabel="label"
+          optionValue="value"
+          display="chip"
+          [filter]="true"
+          [maxSelectedLabels]="5"
+          selectedItemsLabel="{0} permisos"
+          appendTo="body"
+          placeholder="Selecciona permisos"
+          class="w-full"/>
+      </div>
+
+    </div>
+
+    <ng-template pTemplate="footer">
+      <div class="flex justify-end gap-2">
+        <p-button label="Cancelar" severity="secondary" (click)="visible = false"/>
+        <p-button label="Guardar" icon="pi pi-check" severity="success"
+                  [loading]="guardando()" (click)="saveUser()"/>
+      </div>
     </ng-template>
-  </p-table>
-
-  <!-- 🔥 DIALOG -->
-  <p-dialog header="Usuario" [modal]="true" [(visible)]="visible"
-    [style]="{ width: '30rem' }"
-    [draggable]="false" [resizable]="false">
-
-    <span class="block mb-4 text-surface-500">Información del usuario</span>
-
-    <!-- NOMBRE -->
-    <div class="flex items-center gap-4 mb-4">
-      <label class="font-semibold w-24">Nombre</label>
-      <input pInputText [(ngModel)]="user.name" class="flex-auto">
-    </div>
-
-    <!-- EMAIL -->
-    <div class="flex items-center gap-4 mb-4">
-      <label class="font-semibold w-24">Email</label>
-      <input pInputText [(ngModel)]="user.email" class="flex-auto">
-    </div>
-
-    <!-- 🔥 BOTONES PRO -->
-    <div class="flex justify-end gap-2 mb-2">
-      <p-button label="Todos (Admin)" severity="info" (click)="selectAll()"></p-button>
-      <p-button label="Limpiar" severity="secondary" (click)="clearAll()"></p-button>
-    </div>
-
-    <!-- 🔥 MULTISELECT -->
-    <div class="flex items-center gap-4 mb-6">
-      <label class="font-semibold w-24">Permisos</label>
-
-      <p-multiSelect
-        [options]="permissionsList"
-        [(ngModel)]="user.permissions"
-        optionLabel="label"
-        optionValue="value"
-        display="chip"
-        filter="true"
-        [maxSelectedLabels]="3"
-        selectedItemsLabel="{0} permisos seleccionados"
-        appendTo="body"
-        placeholder="Selecciona permisos"
-        class="flex-auto">
-      </p-multiSelect>
-
-    </div>
-
-    <!-- BOTONES -->
-    <div class="flex justify-end gap-2">
-      <p-button label="Cancelar" severity="secondary" (click)="visible=false"></p-button>
-      <p-button label="Guardar" severity="success" (click)="saveUser()"></p-button>
-    </div>
 
   </p-dialog>
 </div>
