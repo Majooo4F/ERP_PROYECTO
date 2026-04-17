@@ -29,7 +29,7 @@
 
 // }
 
-import { Directive, Input, OnInit, TemplateRef, ViewContainerRef } from '@angular/core';
+import { Directive, Input, OnInit, TemplateRef, ViewContainerRef, effect, Injector, runInInjectionContext } from '@angular/core';
 import { PermissionService } from '../services/permission.service';
 
 @Directive({
@@ -43,18 +43,25 @@ export class HasPermissionDirective implements OnInit {
   constructor(
     private permissionSvc: PermissionService,
     private templateRef: TemplateRef<any>,
-    private viewContainer: ViewContainerRef
+    private viewContainer: ViewContainerRef,
+    private injector: Injector
   ) {}
 
   ngOnInit() {
+    runInInjectionContext(this.injector, () => {
+      effect(() => {
+        this.permissionSvc.getPermissions();
 
-    const permisosArray = Array.isArray(this.permisos)
-      ? this.permisos
-      : [this.permisos];
+        const permisosArray = Array.isArray(this.permisos)
+          ? this.permisos
+          : [this.permisos];
 
-    if (this.permissionSvc.hasAnyPermission(permisosArray)) {
-      this.viewContainer.createEmbeddedView(this.templateRef);
-    }
+        this.viewContainer.clear();
+        if (this.permissionSvc.hasAnyPermission(permisosArray)) {
+          this.viewContainer.createEmbeddedView(this.templateRef);
+        }
+      });
+    });
 
   }
 

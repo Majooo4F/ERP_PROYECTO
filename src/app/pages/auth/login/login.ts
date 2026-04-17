@@ -153,7 +153,14 @@ export class Login {
         // guardar usuario
         if (this.isBrowser && data?.user) {
           localStorage.setItem('usuario', JSON.stringify(data.user));
-          localStorage.setItem('grupos', JSON.stringify(data.grupos || []));
+          const grupos = data.grupos || [];
+          localStorage.setItem('grupos', JSON.stringify(grupos));
+
+          // Fijar el contexto de grupo al primer grupo disponible
+          if (grupos.length > 0) {
+            this.permissionSvc.setGroupContext(grupos[0].id ?? null);
+            localStorage.setItem('grupoSeleccionado', JSON.stringify(grupos[0]));
+          }
         }
 
         this.router.navigate(['/home']);

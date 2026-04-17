@@ -1,18 +1,20 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { Router } from '@angular/router';
 
-import { SelectGroup } from './select-group';
+import { GrupoSelector } from './select-group';
 
-describe('SelectGroup', () => {
-  let component: SelectGroup;
-  let fixture: ComponentFixture<SelectGroup>;
+describe('GrupoSelector', () => {
+  let component: GrupoSelector;
+  let fixture: ComponentFixture<GrupoSelector>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [SelectGroup]
+      imports: [GrupoSelector],
+      providers: [{ provide: Router, useValue: { navigate: () => Promise.resolve(true) } }]
     })
     .compileComponents();
 
-    fixture = TestBed.createComponent(SelectGroup);
+    fixture = TestBed.createComponent(GrupoSelector);
     component = fixture.componentInstance;
     await fixture.whenStable();
   });

@@ -1,5 +1,5 @@
-import { Component, ViewChild, OnInit, ChangeDetectorRef, signal } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, ViewChild, OnInit, ChangeDetectorRef, signal, inject, PLATFORM_ID } from '@angular/core';
+import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { FormsModule, ReactiveFormsModule, FormGroup, FormBuilder } from '@angular/forms';
 import { TableModule, Table } from 'primeng/table';
 import { DialogModule } from 'primeng/dialog';
@@ -28,6 +28,8 @@ export class TicketLista implements OnInit {
   @ViewChild('tabla') tabla!: Table;
 
   private apiUrl = 'http://localhost:3000';
+  private platformId = inject(PLATFORM_ID);
+  private isBrowser = isPlatformBrowser(this.platformId);
 
   loading  = signal(false);
   guardando = signal(false);
@@ -81,6 +83,7 @@ export class TicketLista implements OnInit {
   }
 
   ngOnInit() {
+  if (!this.isBrowser) return;
   const user = localStorage.getItem('usuario');
   if (user) this.usuarioActual = JSON.parse(user);
 
@@ -94,8 +97,8 @@ export class TicketLista implements OnInit {
 }
 
   private getHeaders(): HttpHeaders {
-    const token = localStorage.getItem('token');
-    return new HttpHeaders({ Authorization: `Bearer ${token}` });
+    const token = this.isBrowser ? localStorage.getItem('token') : null;
+    return new HttpHeaders({ Authorization: `Bearer ${token ?? ''}` });
   }
 
   cargarMiembros() {

@@ -1,11 +1,10 @@
 <p-toast></p-toast>
 
-<div class="flex min-h-screen bg-gray-50">
+<div class="flex dashboard-page-bg">
   <main class="flex-1 p-6">
 
     <!-- HEADER GRUPO -->
-    <div class="mb-6 p-4 rounded-xl shadow-md text-white flex items-center justify-between"
-         style="background: #3b82f6">
+    <div class="dashboard-header-banner mb-6 p-4 rounded-xl shadow-md flex items-center justify-between">
       <div>
         <h2 class="text-2xl font-bold">{{ grupoActual?.nombre || 'Sin grupo' }}</h2>
         <p class="text-blue-100 text-sm mt-1">{{ grupoActual?.descripcion }}</p>
@@ -16,17 +15,17 @@
     <!-- BOTONES -->
     <div class="mb-8 flex gap-3 flex-wrap">
       <p-button
-  *ngIf="permsSvc.hasPermission('ticket:view')"
+  *ngIf="permsSvc.hasPermission('ticket:ver')"
   label="Ver Kanban" icon="pi pi-th-large"
   severity="primary" [raised]="true" routerLink="/kanban"/>
 
 <p-button
-  *ngIf="permsSvc.hasPermission('ticket:view')"
+  *ngIf="permsSvc.hasPermission('ticket:ver')"
   label="Lista de Tickets" icon="pi pi-table"
   severity="info" [raised]="true" routerLink="/tickets"/>
 
 <p-button
-  *ngIf="permsSvc.hasPermission('ticket:add')"
+  *ngIf="permsSvc.hasPermission('ticket:agregar')"
   label="Nuevo Ticket" icon="pi pi-plus"
   severity="success" [raised]="true" (click)="showDialog()"/>
     </div>

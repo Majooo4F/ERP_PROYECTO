@@ -1,5 +1,5 @@
-import { Component, OnInit, signal, computed } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, OnInit, signal, computed, inject, PLATFORM_ID } from '@angular/core';
+import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, Validators, FormGroup, AbstractControl } from '@angular/forms';
 import { ToastModule } from 'primeng/toast';
 import { ButtonModule } from 'primeng/button';
@@ -23,6 +23,8 @@ import { TagModule } from 'primeng/tag';
 export class User implements OnInit {
 
   private apiUrl = 'http://localhost:3000';
+  private platformId = inject(PLATFORM_ID);
+  private isBrowser = isPlatformBrowser(this.platformId);
 
   showPassword = false;
   editMode = false;
@@ -62,6 +64,7 @@ export class User implements OnInit {
   get f() { return this.userForm.controls; }
 
   ngOnInit() {
+    if (!this.isBrowser) return;
     const stored = localStorage.getItem('usuario');
     if (stored) {
       this.usuarioActual = JSON.parse(stored);
@@ -77,8 +80,8 @@ export class User implements OnInit {
   }
 
   private getHeaders(): HttpHeaders {
-    const token = localStorage.getItem('token');
-    return new HttpHeaders({ Authorization: `Bearer ${token}` });
+    const token = this.isBrowser ? localStorage.getItem('token') : null;
+    return new HttpHeaders({ Authorization: `Bearer ${token ?? ''}` });
   }
 
   cargarTickets() {
@@ -171,7 +174,7 @@ export class User implements OnInit {
         this.userForm.disable();
 
         const updated = { ...this.usuarioActual, ...res.data?.perfil };
-        localStorage.setItem('usuario', JSON.stringify(updated));
+        if (this.isBrowser) localStorage.setItem('usuario', JSON.stringify(updated));
         this.usuarioActual = updated;
 
         this.messageService.add({

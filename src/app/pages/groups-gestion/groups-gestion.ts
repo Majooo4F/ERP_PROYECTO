@@ -1,6 +1,6 @@
-import { Component, ViewChild, OnInit, signal } from '@angular/core';
+import { Component, ViewChild, OnInit, signal, inject, PLATFORM_ID } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { CommonModule } from '@angular/common';
+import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { ButtonModule } from 'primeng/button';
 import { DialogModule } from 'primeng/dialog';
 import { InputTextModule } from 'primeng/inputtext';
@@ -26,6 +26,8 @@ export class GroupsGestion implements OnInit {
   @ViewChild('dt') table!: Table;
 
   private apiUrl = 'http://localhost:3000';
+  private platformId = inject(PLATFORM_ID);
+  private isBrowser = isPlatformBrowser(this.platformId);
 
   visible = false;
   loading = signal(false);
@@ -46,6 +48,7 @@ export class GroupsGestion implements OnInit {
   ) {}
 
   ngOnInit() {
+    if (!this.isBrowser) return;
     const stored = localStorage.getItem('grupoSeleccionado');
     if (stored) {
       this.grupoActual = JSON.parse(stored);
@@ -56,8 +59,8 @@ export class GroupsGestion implements OnInit {
   }
 
   private getHeaders(): HttpHeaders {
-    const token = localStorage.getItem('token');
-    return new HttpHeaders({ Authorization: `Bearer ${token}` });
+    const token = this.isBrowser ? localStorage.getItem('token') : null;
+    return new HttpHeaders({ Authorization: `Bearer ${token ?? ''}` });
   }
 
   cargarMiembros() {

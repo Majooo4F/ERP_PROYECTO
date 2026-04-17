@@ -33,7 +33,7 @@ export const routes: Routes = [
         path: 'groups',
         loadComponent: () => import('./pages/groups/groups').then(m => m.Groups),
         canActivate: [permissionGuard],
-        data: { permission: 'group:view' }
+        data: { permission: 'grupo:ver' }
       },
       {
         path: 'dashboard-group',
@@ -43,25 +43,25 @@ export const routes: Routes = [
         path: 'kanban',
         loadComponent: () => import('./pages/kanban/kanban').then(m => m.Kanban),
         canActivate: [permissionGuard],
-        data: { permission: 'ticket:view' }
+        data: { permission: 'ticket:ver' }
       },
       {
         path: 'tickets',
         loadComponent: () => import('./pages/tickets/tickets').then(m => m.TicketLista),
         canActivate: [permissionGuard],
-        data: { permission: 'ticket:view' }
+        data: { permission: 'ticket:ver' }
       },
       {
         path: 'groups-admin',
         loadComponent: () => import('./pages/groups-admin/groups-admin').then(m => m.GroupManagementComponent),
         canActivate: [permissionGuard],
-        data: { permission: 'user:manage' }
+        data: { permission: 'usuario:admin' }
       },
       {
         path: 'groups-gestion',
         loadComponent: () => import('./pages/groups-gestion/groups-gestion').then(m => m.GroupsGestion),
         canActivate: [permissionGuard],
-        data: { permission: 'group:manage' }
+        data: { permission: 'grupo:admin' }
       },
       {
         path: 'select-group',

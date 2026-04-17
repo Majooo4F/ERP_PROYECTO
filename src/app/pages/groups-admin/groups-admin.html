@@ -8,9 +8,26 @@
       <div>
         <h1 class="text-3xl font-bold text-black">Gestión de Usuarios</h1>
         <p class="text-gray-600 mt-1">Administra usuarios y sus permisos</p>
+        <p class="text-gray-500 mt-1 text-sm" *ngIf="grupoActivo()">
+          Grupo activo: {{ grupoActivo()?.nombre || ('ID ' + grupoActivo()!.id) }} (ID {{ grupoActivo()!.id }})
+        </p>
       </div>
-      <p-button label="Nuevo Usuario" icon="pi pi-user-plus"
-                severity="success" (click)="openNew()"/>
+      <div class="flex items-center gap-3">
+        <div class="flex items-center gap-2" *ngIf="gruposDisponibles().length > 0">
+          <span class="text-sm text-gray-600">Grupo</span>
+          <select
+            class="border rounded px-2 py-1 text-sm"
+            [value]="grupoActivo()?.id || ''"
+            (change)="onChangeGrupoActivo($any($event.target).value)">
+            <option value="" disabled>Selecciona…</option>
+            <option *ngFor="let g of gruposDisponibles()" [value]="g.id">
+              {{ g.nombre || ('Grupo ' + g.id) }}
+            </option>
+          </select>
+        </div>
+        <p-button label="Nuevo Usuario" icon="pi pi-user-plus"
+                  severity="success" (click)="openNew()"/>
+      </div>
     </div>
 
     <!-- TABLA -->
@@ -168,18 +185,23 @@
             <p-button label="Limpiar" severity="secondary" [text]="true" (click)="clearAll()"/>
           </div>
         </div>
-        <p-multiSelect
-          [options]="permissionsList"
-          formControlName="permissions"
-          optionLabel="label"
-          optionValue="value"
-          display="chip"
-          [filter]="true"
-          [maxSelectedLabels]="5"
-          selectedItemsLabel="{0} permisos"
-          appendTo="body"
-          placeholder="Selecciona permisos"
-          class="w-full"/>
+        <ng-container *ngIf="permissionsList.length > 0; else permisosLoadingNew">
+          <p-multiSelect
+            [options]="permissionsList"
+            formControlName="permissions"
+            optionLabel="label"
+            optionValue="value"
+            display="chip"
+            [filter]="true"
+            [maxSelectedLabels]="5"
+            selectedItemsLabel="{0} permisos"
+            appendTo="body"
+            placeholder="Selecciona permisos"
+            class="w-full"/>
+        </ng-container>
+        <ng-template #permisosLoadingNew>
+          <div class="text-sm text-gray-500">Cargando permisos...</div>
+        </ng-template>
       </div>
 
     </form>
@@ -205,18 +227,23 @@
             <p-button label="Limpiar" severity="secondary" [text]="true" (click)="clearAll()"/>
           </div>
         </div>
-        <p-multiSelect
-          [options]="permissionsList"
-          [(ngModel)]="editUser_model.permissions"
-          optionLabel="label"
-          optionValue="value"
-          display="chip"
-          [filter]="true"
-          [maxSelectedLabels]="5"
-          selectedItemsLabel="{0} permisos"
-          appendTo="body"
-          placeholder="Selecciona permisos"
-          class="w-full"/>
+        <ng-container *ngIf="permissionsList.length > 0; else permisosLoadingEdit">
+          <p-multiSelect
+            [options]="permissionsList"
+            [(ngModel)]="editUser_model.permissions"
+            optionLabel="label"
+            optionValue="value"
+            display="chip"
+            [filter]="true"
+            [maxSelectedLabels]="5"
+            selectedItemsLabel="{0} permisos"
+            appendTo="body"
+            placeholder="Selecciona permisos"
+            class="w-full"/>
+        </ng-container>
+        <ng-template #permisosLoadingEdit>
+          <div class="text-sm text-gray-500">Cargando permisos...</div>
+        </ng-template>
       </div>
 
     </div>

@@ -1,0 +1,15 @@
+/* ── Dashboard Grupo — Paleta de colores requerida ─────────────────── */
+.dashboard-header-banner {
+  background: #F54927 !important;
+  color: #fff;
+}
+
+.dashboard-header-banner .text-blue-100 {
+  color: rgba(255, 255, 255, 0.80) !important;
+}
+
+/* Fondo de página principal */
+.dashboard-page-bg {
+  background: #fafafa;
+  min-height: 100vh;
+}

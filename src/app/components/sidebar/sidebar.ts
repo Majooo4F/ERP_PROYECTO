@@ -1,4 +1,4 @@
-import { Component, OnInit, effect } from '@angular/core';
+import { Component, effect } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterLink, RouterLinkActive } from '@angular/router';
 
@@ -53,9 +53,9 @@ export class Sidebar {
             label: 'Dashboard',
             icon: 'pi pi-th-large',
             command: () => this.router.navigate(['/dashboard-group']),
-            visible: this.permsSvc.hasPermission('group:view')
+            visible: this.permsSvc.hasPermission('grupo:ver')
           },
-          ...(this.permsSvc.hasPermission('user:view') ? [{
+          ...(this.permsSvc.hasPermission('usuario:ver') ? [{
             label: 'Perfil',
             icon: 'pi pi-user',
             command: () => this.router.navigate(['/user'])
@@ -64,25 +64,27 @@ export class Sidebar {
             label: 'Mis Grupos',
             icon: 'pi pi-id-card',
             command: () => this.router.navigate(['/groups'])
-            
           },
-          ...(this.permsSvc.hasPermission('ticket:view') && !this.permsSvc.hasPermission('user:manage') ? [{
-  label: 'Tickets',
-  icon: 'pi pi-ticket',
-  command: () => this.router.navigate(['/tickets'])
-}] : []),
+          // Tickets: visible si tiene ticket:ver pero NO es administrador
+          ...(this.permsSvc.hasPermission('ticket:ver') && !this.permsSvc.hasPermission('usuario:admin') ? [{
+            label: 'Tickets',
+            icon: 'pi pi-ticket',
+            command: () => this.router.navigate(['/tickets'])
+          }] : []),
         ]
       },
       { separator: true },
       {
         label: 'Administración',
         items: [
-          ...(this.permsSvc.hasPermission('user:manage') ? [{
+          // Gestión de Usuarios: requiere usuario:admin
+          ...(this.permsSvc.hasPermission('usuario:admin') ? [{
             label: 'Gestión de Usuarios',
             icon: 'pi pi-users',
             command: () => this.router.navigate(['/groups-admin'])
           }] : []),
-          ...(this.permsSvc.hasPermission('group:manage') ? [{
+          // Gestión de Grupo: requiere grupo:admin
+          ...(this.permsSvc.hasPermission('grupo:admin') ? [{
             label: 'Gestión de Grupo',
             icon: 'pi pi-cog',
             command: () => this.router.navigate(['/groups-gestion'])
@@ -100,4 +102,4 @@ export class Sidebar {
       }
     ];
   }
-}
+}

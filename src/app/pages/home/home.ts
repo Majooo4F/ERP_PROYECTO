@@ -1,5 +1,5 @@
-import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, OnInit, ChangeDetectorRef, inject, PLATFORM_ID } from '@angular/core';
+import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { CardModule } from 'primeng/card';
 import { ButtonModule } from 'primeng/button';
 import { Router } from '@angular/router';
@@ -19,6 +19,8 @@ export class Home implements OnInit {
   cargado = false;
 
   private apiUrl = 'http://localhost:3000';
+  private platformId = inject(PLATFORM_ID);
+  private isBrowser = isPlatformBrowser(this.platformId);
 
   constructor(
     private router: Router,
@@ -27,6 +29,7 @@ export class Home implements OnInit {
   ) {}
 
   ngOnInit() {
+    if (!this.isBrowser) return;
     const stored = localStorage.getItem('usuario');
     if (stored) {
       try {
@@ -40,6 +43,7 @@ export class Home implements OnInit {
   }
 
   cargarGrupos() {
+    if (!this.isBrowser) return;
     this.loading = true;
     const token = localStorage.getItem('token');
     const headers = new HttpHeaders({ Authorization: `Bearer ${token}` });
@@ -61,6 +65,7 @@ export class Home implements OnInit {
   }
 
   entrarGrupo(grupo: any) {
+    if (!this.isBrowser) return;
     localStorage.setItem('grupoSeleccionado', JSON.stringify(grupo));
     this.router.navigate(['/dashboard-group']);
   }

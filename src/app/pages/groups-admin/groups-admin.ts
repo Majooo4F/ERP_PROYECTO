@@ -1,7 +1,7 @@
-import { Component, ViewChild, OnInit, signal } from '@angular/core';
+import { Component, ViewChild, OnInit, signal, inject, PLATFORM_ID } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule, AbstractControl } from '@angular/forms';
 import { FormsModule } from '@angular/forms';
-import { CommonModule } from '@angular/common';
+import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { ButtonModule } from 'primeng/button';
 import { DialogModule } from 'primeng/dialog';
 import { InputTextModule } from 'primeng/inputtext';
@@ -26,11 +26,13 @@ export class GroupManagementComponent implements OnInit {
   @ViewChild('dt') table!: Table;
 
   private apiUrl = 'http://localhost:3000';
+  private platformId = inject(PLATFORM_ID);
+  private isBrowser = isPlatformBrowser(this.platformId);
 
   visible = false;
   isEdit = false;
   editUserId: number | null = null;
-  loading = signal(false);
+  loading = signal(true);
   guardando = signal(false);
   showPassword = false;
 
@@ -40,17 +42,11 @@ export class GroupManagementComponent implements OnInit {
   users = signal<any[]>([]);
   permissionsList: any[] = [];
 
-  permisosMap: Record<string, number> = {
-    'user:view': 1, 'user:add': 2, 'user:edit': 3,
-    'user:edit:profile': 4, 'user:delete': 5, 'user:manage': 6,
-    'group:view': 7, 'group:add': 8, 'group:edit': 9,
-    'group:delete': 10, 'group:manage': 11,
-    'ticket:view': 12, 'ticket:add': 13, 'ticket:edit': 14,
-    'ticket:delete': 15, 'ticket:edit:state': 16,
-    'ticket:edit:comment': 17, 'ticket:manage': 18
-  };
-
-  private permisosAdmin = [6, 11, 18];
+  private grupoId = signal<number | null>(null);
+  grupoActivo = signal<{ id: number; nombre?: string; descripcion?: string } | null>(null);
+  gruposDisponibles = signal<Array<{ id: number; nombre?: string; descripcion?: string }>>([]);
+  private catalogoPermisos = signal<Array<{ id: number; nombre: string; descripcion: string | null }>>([]);
+  private permisoNombreToId = new Map<string, number>();
 
   constructor(
     private http: HttpClient,
@@ -59,9 +55,109 @@ export class GroupManagementComponent implements OnInit {
   ) {}
 
   ngOnInit() {
+    if (this.isBrowser) this.syncGrupoActivoDesdeStorage();
+    if (this.isBrowser) this.cargarListaGrupos();
     this.loadPermissions();
-    this.cargarUsuarios();
     this.initForm();
+    if (!this.isBrowser) return;
+    this.cargarUsuarios();
+  }
+
+  private syncGrupoActivoDesdeStorage() {
+    const storedGrupo = localStorage.getItem('grupoSeleccionado');
+    if (storedGrupo && storedGrupo !== 'undefined') {
+      try {
+        const parsed = JSON.parse(storedGrupo);
+        if (parsed?.id) {
+          this.grupoId.set(Number(parsed.id));
+          this.grupoActivo.set({ id: Number(parsed.id), nombre: parsed.nombre });
+          return;
+        }
+      } catch {}
+    }
+
+    const storedContext = localStorage.getItem('groupContext');
+    if (storedContext && storedContext !== 'undefined') {
+      try {
+        const parsed = JSON.parse(storedContext);
+        if (parsed !== null && parsed !== undefined) {
+          this.grupoId.set(Number(parsed));
+          this.grupoActivo.set({ id: Number(parsed) });
+          return;
+        }
+      } catch {}
+    }
+
+    this.grupoId.set(null);
+    this.grupoActivo.set(null);
+  }
+
+  private cargarListaGrupos() {
+    const stored = localStorage.getItem('grupos');
+    if (stored && stored !== 'undefined') {
+      try {
+        const parsed = JSON.parse(stored);
+        if (Array.isArray(parsed)) {
+          this.gruposDisponibles.set(parsed.map((g: any) => ({ id: Number(g.id), nombre: g.nombre, descripcion: g.descripcion })));
+          return;
+        }
+      } catch {}
+    }
+
+    this.http.get<any>(`${this.apiUrl}/groups`, { headers: this.getHeaders() })
+      .subscribe({
+        next: (res) => {
+          const data = Array.isArray(res?.data) ? res.data : [];
+          this.gruposDisponibles.set(data.map((g: any) => ({ id: Number(g.id), nombre: g.nombre, descripcion: g.descripcion })));
+        },
+        error: () => {
+          this.gruposDisponibles.set([]);
+        }
+      });
+  }
+
+  onChangeGrupoActivo(grupoIdStr: string) {
+    const grupoId = Number(grupoIdStr);
+    if (!Number.isFinite(grupoId) || grupoId <= 0) return;
+
+    const grupo = this.gruposDisponibles().find(g => g.id === grupoId) ?? { id: grupoId };
+    this.grupoId.set(grupoId);
+    this.grupoActivo.set(grupo);
+
+    if (this.isBrowser) {
+      localStorage.setItem('groupContext', JSON.stringify(grupoId));
+      localStorage.setItem('grupoSeleccionado', JSON.stringify(grupo));
+    }
+
+    this.cargarUsuarios();
+  }
+
+  private resolveGrupoId(): number | null {
+    const storedGrupo = localStorage.getItem('grupoSeleccionado');
+    if (storedGrupo && storedGrupo !== 'undefined') {
+      try {
+        const parsed = JSON.parse(storedGrupo);
+        if (parsed?.id) return Number(parsed.id);
+      } catch {}
+    }
+
+    const storedContext = localStorage.getItem('groupContext');
+    if (storedContext && storedContext !== 'undefined') {
+      try {
+        const parsed = JSON.parse(storedContext);
+        if (parsed !== null && parsed !== undefined) return Number(parsed);
+      } catch {}
+    }
+
+    const storedGrupos = localStorage.getItem('grupos');
+    if (storedGrupos && storedGrupos !== 'undefined') {
+      try {
+        const parsed = JSON.parse(storedGrupos);
+        if (Array.isArray(parsed) && parsed.length > 0 && parsed[0]?.id) return Number(parsed[0].id);
+      } catch {}
+    }
+
+    return null;
   }
 
   initForm() {
@@ -102,8 +198,8 @@ export class GroupManagementComponent implements OnInit {
   }
 
   private getHeaders(): HttpHeaders {
-    const token = localStorage.getItem('token');
-    return new HttpHeaders({ Authorization: `Bearer ${token}` });
+    const token = this.isBrowser ? localStorage.getItem('token') : null;
+    return new HttpHeaders({ Authorization: `Bearer ${token ?? ''}` });
   }
 
   cargarUsuarios() {
@@ -112,14 +208,21 @@ export class GroupManagementComponent implements OnInit {
       .subscribe({
         next: async (res) => {
           const data = res.data || [];
+          if (this.isBrowser) this.syncGrupoActivoDesdeStorage();
+          const grupoId = this.grupoId();
           const usersConPermisos = await Promise.all(
             data.map(async (u: any) => {
               try {
-                const permRes: any = await this.http.get<any>(
-                  `${this.apiUrl}/groups/permisos-usuario/${u.id}`,
-                  { headers: this.getHeaders() }
-                ).toPromise();
-                const permisos = permRes?.data?.map((p: any) => p.permisos?.nombre).filter(Boolean) || [];
+                const url = grupoId
+                  ? `${this.apiUrl}/groups/${grupoId}/permisos/usuario/${u.id}`
+                  : `${this.apiUrl}/groups/permisos-usuario/${u.id}`;
+
+                const permRes: any = await this.http.get<any>(url, { headers: this.getHeaders() }).toPromise();
+
+                const permisos = (permRes?.data ?? [])
+                  .map((p: any) => p?.permisos?.nombre)
+                  .filter(Boolean);
+
                 return {
                   id: u.id,
                   name: u.nombre_completo,
@@ -159,14 +262,33 @@ export class GroupManagementComponent implements OnInit {
   }
 
   loadPermissions() {
-    const allPerms = [
-      'user:view', 'user:add', 'user:edit', 'user:edit:profile', 'user:delete', 'user:manage',
-      'group:view', 'group:add', 'group:edit', 'group:delete', 'group:manage',
-      'ticket:view', 'ticket:add', 'ticket:edit', 'ticket:delete',
-      'ticket:edit:state', 'ticket:edit:comment', 'ticket:manage'
-    ];
-    this.permissionsList = allPerms.map(p => ({ label: this.formatPerm(p), value: p }));
-  }
+  this.http.get<any>(`${this.apiUrl}/groups/permisos-catalogo`, { headers: this.getHeaders() })
+    .subscribe({
+      next: (res) => {
+        const raw = Array.isArray(res?.data) ? res.data : [];
+
+        // Solo excluir "admin" (super admin global, no asignable manualmente)
+        const data = raw.filter((p: any) => p?.nombre !== 'admin');
+
+        setTimeout(() => {
+          this.catalogoPermisos.set(data);
+          this.permisoNombreToId = new Map(data.map((p: any) => [p.nombre, p.id]));
+          this.permissionsList = data.map((p: any) => ({
+            label: this.formatPerm(p.nombre),
+            value: p.nombre
+          }));
+        }, 0);
+      },
+      error: () => {
+        this.permissionsList = [];
+        this.catalogoPermisos.set([]);
+        this.permisoNombreToId.clear();
+        this.messageService.add({
+          severity: 'error', summary: 'Error', detail: 'No se pudo cargar el catálogo de permisos'
+        });
+      }
+    });
+}
 
   formatPerm(perm: string): string {
     return perm ? perm.replace(/:/g, ' - ') : '';
@@ -239,43 +361,52 @@ export class GroupManagementComponent implements OnInit {
   }
 
   async guardarPermisos(usuarioId: number, permisos: string[]) {
-    const grupoId = 7;
+  if (this.isBrowser) this.syncGrupoActivoDesdeStorage();
+  const grupoId = this.grupoId();
+  if (!grupoId) {
+    this.guardando.set(false);
+    this.messageService.add({
+      severity: 'warn', summary: 'Sin grupo', detail: 'Selecciona un grupo antes de asignar permisos'
+    });
+    return;
+  }
 
-    try {
-      await this.http.delete<any>(
-        `${this.apiUrl}/groups/${grupoId}/usuario/${usuarioId}/permisos`,
-        { headers: this.getHeaders() }
-      ).toPromise();
-    } catch {}
+  try {
+    await this.http.delete<any>(
+      `${this.apiUrl}/groups/${grupoId}/usuario/${usuarioId}/permisos`,
+      { headers: this.getHeaders() }
+    ).toPromise();
+  } catch {}
 
-    await new Promise(resolve => setTimeout(resolve, 300));
+  await new Promise(resolve => setTimeout(resolve, 300));
 
-    if (permisos.length > 0) {
-      const permisosIds = permisos
-        .map(p => this.permisosMap[p])
-        .filter(id => !!id && !this.permisosAdmin.includes(id));
+  if (permisos.length > 0) {
+    // El backend rechaza "admin" — no necesitamos filtrarlo aquí
+    const permisosIds = permisos
+      .map(p => this.permisoNombreToId.get(p))
+      .filter((id): id is number => typeof id === 'number' && id > 0);
 
-      for (const permisoId of permisosIds) {
-        try {
-          await this.http.post<any>(
-            `${this.apiUrl}/groups/${grupoId}/permisos`,
-            { usuario_id: usuarioId, permiso_id: permisoId },
-            { headers: this.getHeaders() }
-          ).toPromise();
-        } catch (err: any) {
-          console.error('Error en permiso:', permisoId, err);
-        }
+    for (const permisoId of permisosIds) {
+      try {
+        await this.http.post<any>(
+          `${this.apiUrl}/groups/${grupoId}/permisos`,
+          { usuario_id: usuarioId, permiso_id: permisoId },
+          { headers: this.getHeaders() }
+        ).toPromise();
+      } catch (err: any) {
+        console.error('Error en permiso:', permisoId, err);
       }
     }
-
-    this.guardando.set(false);
-    this.visible = false;
-    this.messageService.add({
-      severity: 'success', summary: 'Guardado',
-      detail: permisos.length === 0 ? 'Todos los permisos fueron eliminados' : 'Permisos guardados correctamente'
-    });
-    this.cargarUsuarios();
   }
+
+  this.guardando.set(false);
+  this.visible = false;
+  this.messageService.add({
+    severity: 'success', summary: 'Guardado',
+    detail: permisos.length === 0 ? 'Todos los permisos fueron eliminados' : 'Permisos guardados correctamente'
+  });
+  this.cargarUsuarios();
+}
 
   deleteUser(u: any) {
     this.http.delete<any>(

@@ -11,7 +11,7 @@
     </div>
 
     <!-- STATS — solo admin -->
-    <div *ngIf="permsSvc.hasPermission('group:manage')"
+    <div *ngIf="permsSvc.hasPermission('grupo:admin')"
          class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
 
       <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 text-center">
@@ -37,7 +37,7 @@
 
         <div class="flex justify-between items-center mb-4">
           <h2 class="text-xl font-bold text-black">Lista de Grupos</h2>
-          <p-button *ifHasPermission="'group:add'"
+          <p-button *ifHasPermission="'grupo:agregar'"
             label="Nuevo Grupo" icon="pi pi-plus"
             severity="success" (click)="openNew()"/>
         </div>
@@ -63,11 +63,11 @@
               </td>
               <td style="padding:12px 16px;">
                 <div class="flex gap-2">
-                  <p-button *ifHasPermission="'group:edit'"
+                  <p-button *ifHasPermission="'grupo:editar'"
                     icon="pi pi-pencil" severity="info"
                     [rounded]="true" [text]="true"
                     (click)="edit(grupo)"/>
-                  <p-button *ifHasPermission="'group:delete'"
+                  <p-button *ifHasPermission="'grupo:eliminar'"
                     icon="pi pi-trash" severity="danger"
                     [rounded]="true" [text]="true"
                     (click)="confirmDelete(grupo)"/>

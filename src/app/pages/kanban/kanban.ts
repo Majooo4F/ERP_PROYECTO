@@ -1,5 +1,5 @@
-import { Component, OnInit, signal } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, OnInit, signal, inject, PLATFORM_ID } from '@angular/core';
+import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { ButtonModule } from 'primeng/button';
 import { TagModule } from 'primeng/tag';
 import { DialogModule } from 'primeng/dialog';
@@ -27,6 +27,8 @@ import { PermissionService } from '../../services/permission.service';
 export class Kanban implements OnInit {
 
   private apiUrl = 'http://localhost:3000';
+  private platformId = inject(PLATFORM_ID);
+  private isBrowser = isPlatformBrowser(this.platformId);
 
   modoLista = false;
   visible = false;
@@ -71,18 +73,24 @@ export class Kanban implements OnInit {
   ) {}
 
   ngOnInit() {
+    if (!this.isBrowser) return;
     const user = localStorage.getItem('usuario');
     if (user) this.usuarioActual = JSON.parse(user);
 
     const grupo = localStorage.getItem('grupoSeleccionado');
     if (grupo) this.grupoActual = JSON.parse(grupo);
 
+    // Sincronizar el contexto de grupo en el servicio de permisos
+    if (this.grupoActual?.id) {
+      this.permsSvc.setGroupContext(this.grupoActual.id);
+    }
+
     this.cargarTickets();
   }
 
   private getHeaders(): HttpHeaders {
-    const token = localStorage.getItem('token');
-    return new HttpHeaders({ Authorization: `Bearer ${token}` });
+    const token = this.isBrowser ? localStorage.getItem('token') : null;
+    return new HttpHeaders({ Authorization: `Bearer ${token ?? ''}` });
   }
 
   cargarTickets() {

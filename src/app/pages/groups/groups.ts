@@ -1,5 +1,5 @@
-import { Component, OnInit, signal } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, OnInit, signal, inject, PLATFORM_ID } from '@angular/core';
+import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { CardModule } from 'primeng/card';
 import { ButtonModule } from 'primeng/button';
@@ -29,6 +29,8 @@ import { PermissionService } from '../../services/permission.service';
 export class Groups implements OnInit {
 
   private apiUrl = 'http://localhost:3000';
+  private platformId = inject(PLATFORM_ID);
+  private isBrowser = isPlatformBrowser(this.platformId);
 
   registros = signal<any[]>([]);
   loading = signal(false);
@@ -50,12 +52,13 @@ export class Groups implements OnInit {
   ) {}
 
   ngOnInit() {
+    if (!this.isBrowser) return;
     this.cargarMisGrupos();
   }
 
   private getHeaders(): HttpHeaders {
-    const token = localStorage.getItem('token');
-    return new HttpHeaders({ Authorization: `Bearer ${token}` });
+    const token = this.isBrowser ? localStorage.getItem('token') : null;
+    return new HttpHeaders({ Authorization: `Bearer ${token ?? ''}` });
   }
 
   cargarGrupos() {
@@ -76,6 +79,7 @@ export class Groups implements OnInit {
   }
 
   cargarMisGrupos() {
+    if (!this.isBrowser) return;
     this.loading.set(true);
     const usuario = JSON.parse(localStorage.getItem('usuario') || '{}');
     if (!usuario?.id) {
@@ -153,6 +157,19 @@ export class Groups implements OnInit {
       this.messageService.add({ severity: 'warn', summary: 'Campo requerido', detail: 'El nombre es obligatorio' });
       return;
     }
+
+    const descripcionLimpia = (this.form.descripcion ?? '').trim();
+    if (!descripcionLimpia) {
+      this.form.descripcion = 'Sin descripción';
+    } else if (descripcionLimpia.length < 5) {
+      this.messageService.add({
+        severity: 'warn',
+        summary: 'Descripción inválida',
+        detail: 'La descripción debe tener mínimo 5 caracteres (o déjala vacía y se pondrá "Sin descripción").'
+      });
+      return;
+    }
+
     this.guardando.set(true);
 
     if (this.isEdit && this.editId) {

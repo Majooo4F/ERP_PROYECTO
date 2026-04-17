@@ -1,5 +1,5 @@
-import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, OnInit, ChangeDetectorRef, inject, PLATFORM_ID } from '@angular/core';
+import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { CardModule } from 'primeng/card';
 import { ButtonModule } from 'primeng/button';
@@ -21,7 +21,8 @@ import { PermissionService } from '../../services/permission.service';
     RouterLink, SelectModule, ToastModule
   ],
   providers: [MessageService],
-  templateUrl: './dashboard-group.html'
+  templateUrl: './dashboard-group.html',
+  styleUrls: ['./dashboard-group.css']
 })
 export class DashboardGrupo implements OnInit {
 
@@ -58,6 +59,8 @@ export class DashboardGrupo implements OnInit {
   ];
 
   private apiUrl = 'http://localhost:3000';
+  private platformId = inject(PLATFORM_ID);
+  private isBrowser = isPlatformBrowser(this.platformId);
 
   constructor(
     public permsSvc: PermissionService,
@@ -67,16 +70,20 @@ export class DashboardGrupo implements OnInit {
   ) {}
 
   ngOnInit() {
+    if (!this.isBrowser) return;
     const data = localStorage.getItem('grupoSeleccionado');
     this.grupoActual = data ? JSON.parse(data) : null;
     if (this.grupoActual?.id) {
-      this.cargarTickets(); // ← sin setTimeout para evitar NG0100
+      // ✅ Fix #2: Cargar permisos reales del grupo antes de renderizar
+      this.permsSvc.loadPermissionsForGroup(this.grupoActual.id).then(() => {
+        this.cargarTickets();
+      });
     }
   }
 
   private getHeaders(): HttpHeaders {
-    const token = localStorage.getItem('token');
-    return new HttpHeaders({ Authorization: `Bearer ${token}` });
+    const token = this.isBrowser ? localStorage.getItem('token') : null;
+    return new HttpHeaders({ Authorization: `Bearer ${token ?? ''}` });
   }
 
   cargarTickets() {
@@ -94,7 +101,7 @@ export class DashboardGrupo implements OnInit {
           this.hechos     = delGrupo.filter(t => t.estado === 'hecho').length;
           this.bloqueados = delGrupo.filter(t => t.estado === 'bloqueado').length;
 
-          localStorage.setItem('ticketsGrupo', JSON.stringify(delGrupo));
+          if (this.isBrowser) localStorage.setItem('ticketsGrupo', JSON.stringify(delGrupo));
 
           // Notifica a Angular que revise cambios limpiamente
           this.cdr.markForCheck();
@@ -111,6 +118,7 @@ export class DashboardGrupo implements OnInit {
   }
 
   dibujarGraficas() {
+    if (!this.isBrowser) return;
     // setTimeout aquí está bien: solo lo usamos para esperar a que el DOM
     // pinte los <canvas> DESPUÉS de que Angular actualizó la vista.
     setTimeout(() => {
@@ -120,6 +128,7 @@ export class DashboardGrupo implements OnInit {
   }
 
   dibujarDonut() {
+    if (!this.isBrowser) return;
     const canvas = document.getElementById('donutChart') as HTMLCanvasElement;
     if (!canvas) return;
     const ctx = canvas.getContext('2d');
@@ -180,6 +189,7 @@ export class DashboardGrupo implements OnInit {
   }
 
   dibujarBarras() {
+    if (!this.isBrowser) return;
     const canvas = document.getElementById('barChart') as HTMLCanvasElement;
     if (!canvas) return;
     const ctx = canvas.getContext('2d');
@@ -225,7 +235,7 @@ export class DashboardGrupo implements OnInit {
   }
 
   showDialog() {
-    if (this.permsSvc.hasPermission('ticket:add')) {
+    if (this.permsSvc.hasPermission('ticket:agregar')) {
       this.visible = true;
     } else {
       this.messageService.add({
